@@ -1,0 +1,46 @@
+/* =============================================================
+   src/components/colaboradores/colaboradores.css
+   Animaciones y estilos de la página Colaboradores (antes se
+   inyectaban como un <style> con template literal).
+   ============================================================= */
+
+@keyframes fadeInUp {
+  from { opacity:0; transform:translateY(14px); }
+  to   { opacity:1; transform:translateY(0); }
+}
+@keyframes fadeIn {
+  from { opacity:0; }
+  to   { opacity:1; }
+}
+@keyframes shimmer {
+  0%   { background-position:200% 0; }
+  100% { background-position:-200% 0; }
+}
+@keyframes scaleIn {
+  from { opacity:0; transform:scale(0.96); }
+  to   { opacity:1; transform:scale(1); }
+}
+.col-kpi    { animation: fadeInUp .35s ease both; }
+.col-kpi:nth-child(1) { animation-delay:.00s }
+.col-kpi:nth-child(2) { animation-delay:.06s }
+.col-kpi:nth-child(3) { animation-delay:.12s }
+.col-kpi:nth-child(4) { animation-delay:.18s }
+.col-kpi:hover:not(.no-hover) { box-shadow: var(--shadow-md); transform: translateY(-2px); }
+.col-card   { animation: fadeInUp .28s ease both; box-shadow: var(--shadow); }
+.col-card:hover { box-shadow: var(--shadow-md); transform: translateY(-3px); }
+.col-row     { animation: fadeIn  .22s ease both; }
+.col-chip    {
+  display:inline-flex; align-items:center; gap:5px;
+  padding:3px 10px; border-radius:999px; font-size:12px; font-weight:600;
+  background:#EFF6FF; color:#1D4ED8; border:1px solid #BFDBFE;
+  animation: fadeIn .2s ease both;
+}
+.col-chip button { background:none; border:none; cursor:pointer; color:#1D4ED8; display:flex; align-items:center; padding:0; opacity:.7; transition:opacity .15s; }
+.col-chip button:hover { opacity:1; }
+.col-skel {
+  background: linear-gradient(90deg, var(--border) 25%, var(--bg) 50%, var(--border) 75%);
+  background-size:200% 100%; animation:shimmer 1.4s infinite; border-radius:6px;
+}
+.col-tab { padding:6px 14px; border-radius:20px; font-size:12px; font-weight:700; cursor:pointer; border:1px solid var(--border); background:var(--surface); color:var(--text); transition:all .18s; white-space:nowrap; }
+.col-tab:hover { border-color:var(--secondary); color:var(--secondary-dark); }
+.col-tab.active { background:var(--secondary); color:#fff; border-color:var(--secondary); box-shadow: 0 4px 12px rgba(var(--secondary-rgb),.3); }

@@ -1,0 +1,82 @@
+import { X, Edit2 } from 'lucide-react'
+import AnimatedModal from '../ui/AnimatedModal'
+import { statusPill } from './pillsConstants'
+import { normalizarConcepto, CONCEPTO_COLORS } from '../../utils/parseExcel'
+
+function Section({ title, children }) {
+  return (
+    <div style={{ marginBottom: 20 }}>
+      <div style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--text-muted)', marginBottom: 8, paddingBottom: 4, borderBottom: '1px solid var(--border)' }}>{title}</div>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px 20px' }}>{children}</div>
+    </div>
+  )
+}
+
+function Field({ label, value, full = false }) {
+  return (
+    <div style={full ? { gridColumn: '1/-1' } : {}}>
+      <div style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 2 }}>{label}</div>
+      <div style={{ fontSize: 14, fontWeight: 500, color: 'var(--text)' }}>{value || <span style={{ color: '#D1D5DB' }}>—</span>}</div>
+    </div>
+  )
+}
+
+export default function ViewDetailModal({ viewRow, onClose, onEdit }) {
+  return (
+    <AnimatedModal open={!!viewRow} onRequestClose={onClose} maxWidth={600}>
+      {viewRow && (() => {
+        const tipo = normalizarConcepto(viewRow.concepto)
+        const color = CONCEPTO_COLORS[tipo] || '#374151'
+        return (
+          <>
+            <div className="modal-header">
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                <span className="badge" style={{ background: color + '20', color, fontSize: 13, padding: '4px 12px' }}>{viewRow.concepto}</span>
+                <h2 style={{ margin: 0, fontSize: 16 }}>{viewRow.nombre_empleado}</h2>
+              </div>
+              <button className="modal-close" onClick={onClose}><X size={18} /></button>
+            </div>
+            <div className="modal-body" style={{ maxHeight: '70vh', overflowY: 'auto' }}>
+              <Section title="Información general">
+                <Field label="Empleado" value={viewRow.nombre_empleado} full />
+                <Field label="Concepto" value={viewRow.concepto} />
+                <Field label="Periodo" value={viewRow.periodo} />
+                <Field label="Fecha inicio" value={viewRow.fecha_inicio} />
+                <Field label="Fecha fin" value={viewRow.fecha_fin} />
+                <Field label="Total días" value={viewRow.total_dias != null ? String(viewRow.total_dias) : null} />
+                <Field label="Jornada" value={viewRow.jornada === 'Medio día' ? '🕐 Medio día' : (viewRow.concepto === 'LNR' || viewRow.concepto === 'LR') ? 'Día completo' : null} />
+                <Field label="Diagnóstico" value={viewRow.diagnostico} />
+                <Field label="Dependencia / Área" value={viewRow.dependencia} full />
+              </Section>
+              <Section title="Estados y validaciones">
+                {[
+                  ['Válid. Incapacidad', viewRow.validacion_incapacidad],
+                  ['Prórroga', viewRow.prorroga],
+                  ['Rad. Incapacidades', viewRow.radicacion_incapacidad],
+                  ['Obs. Contabilidad', viewRow.observacion_contabilidad],
+                  ['Nómina Electrónica', viewRow.nomina_electronica],
+                  ['Seguridad Social', viewRow.seguridad_social],
+                ].map(([label, val]) => (
+                  <div key={label}>
+                    <div style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 4 }}>{label}</div>
+                    {statusPill(val)}
+                  </div>
+                ))}
+              </Section>
+              {viewRow.observacion && (
+                <div>
+                  <div style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--text-muted)', marginBottom: 8, paddingBottom: 4, borderBottom: '1px solid var(--border)' }}>Observación</div>
+                  <div style={{ fontSize: 14, color: 'var(--text)', background: 'var(--bg)', borderRadius: 8, padding: '12px 14px', lineHeight: 1.6, whiteSpace: 'pre-wrap' }}>{viewRow.observacion}</div>
+                </div>
+              )}
+            </div>
+            <div className="modal-footer">
+              <button className="btn btn-ghost" onClick={onClose}>Cerrar</button>
+              <button className="btn btn-primary" onClick={() => onEdit(viewRow)}><Edit2 size={14} /> Editar</button>
+            </div>
+          </>
+        )
+      })()}
+    </AnimatedModal>
+  )
+}

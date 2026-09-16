@@ -1,0 +1,63 @@
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(14px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@keyframes slideInRight {
+  from { opacity: 0; transform: translateX(10px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+@keyframes shimmer {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+.vac-kpi { animation: fadeInUp 0.35s ease both; }
+.vac-kpi:nth-child(1) { animation-delay: 0.00s; }
+.vac-kpi:nth-child(2) { animation-delay: 0.06s; }
+.vac-kpi:nth-child(3) { animation-delay: 0.12s; }
+.vac-kpi:nth-child(4) { animation-delay: 0.18s; }
+.vac-kpi:nth-child(5) { animation-delay: 0.24s; }
+.vac-kpi:hover:not(.no-hover) { box-shadow: var(--shadow-md); transform: translateY(-2px); }
+.vac-row { animation: fadeIn 0.22s ease both; }
+.vac-card { animation: fadeInUp 0.28s ease both; box-shadow: var(--shadow); }
+.vac-card:hover { box-shadow: var(--shadow-md); transform: translateY(-2px); }
+.vac-chip {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 3px 10px; border-radius: 999px;
+  font-size: 12px; font-weight: 600;
+  background: #EFF6FF; color: #1D4ED8;
+  border: 1px solid #BFDBFE; cursor: default;
+  animation: slideInRight 0.18s ease both;
+}
+.vac-chip button {
+  background: none; border: none; cursor: pointer;
+  color: #1D4ED8; display: flex; align-items: center; padding: 0;
+  opacity: 0.7; transition: opacity 0.15s;
+}
+.vac-chip button:hover { opacity: 1; }
+.vac-tab {
+  padding: 7px 15px; border-radius: 10px; font-size: 13px; font-weight: 700;
+  cursor: pointer; display: flex; align-items: center; gap: 6px;
+  transition: all .18s; border: 1px solid var(--border);
+  background: #fff; color: var(--text);
+}
+.vac-tab:hover { border-color: var(--secondary); color: var(--secondary-dark); }
+.vac-tab.active { background: var(--secondary); color: #fff; border-color: var(--secondary); box-shadow: 0 4px 12px rgba(var(--secondary-rgb),.3); }
+.vac-skeleton {
+  background: linear-gradient(90deg, var(--border) 25%, var(--bg) 50%, var(--border) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.4s infinite;
+  border-radius: 6px;
+}
+.vac-view-btn {
+  padding: 4px 8px; border-radius: 6px; border: none; cursor: pointer;
+  font-size: 14px; transition: all 0.15s;
+}
+
+/* ── Modo oscuro ── */
+:root[data-theme="dark"] .vac-chip { background: rgba(59,130,246,.16); color: #93C5FD; border-color: rgba(59,130,246,.35); }
+:root[data-theme="dark"] .vac-chip button { color: #93C5FD; }
+:root[data-theme="dark"] .vac-tab { background: var(--surface); }

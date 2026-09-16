@@ -1,0 +1,62 @@
+@keyframes nvFadeSlideUp {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes nvPulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50%      { opacity: 0.45; transform: scale(0.85); }
+}
+@keyframes nvRowHighlight {
+  0%   { background-color: #DCFCE7; }
+  65%  { background-color: #DCFCE7; }
+  100% { background-color: transparent; }
+}
+@keyframes nvBackdropIn  { from { opacity: 0; } to { opacity: 1; } }
+@keyframes nvBackdropOut { from { opacity: 1; } to { opacity: 0; } }
+@keyframes nvModalIn {
+  from { opacity: 0; transform: scale(0.95) translateY(8px); }
+  to   { opacity: 1; transform: scale(1) translateY(0); }
+}
+@keyframes nvModalOut {
+  from { opacity: 1; transform: scale(1) translateY(0); }
+  to   { opacity: 0; transform: scale(0.96) translateY(6px); }
+}
+.nv-anim-row {
+  animation: nvFadeSlideUp 0.32s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+.nv-row-highlight {
+  animation: nvRowHighlight 2.2s ease-out forwards;
+}
+.table-container {
+  max-height: 70vh;
+  overflow: auto;
+}
+.table-container thead th {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  background: var(--surface);
+  box-shadow: 0 1px 0 0 var(--border);
+}
+.table-container tbody tr {
+  transition: background-color 0.15s ease;
+}
+.table-container tbody tr:nth-child(even) {
+  background-color: rgba(0, 0, 0, 0.025);
+}
+.table-container tbody tr:hover {
+  background-color: rgba(0, 0, 0, 0.06);
+}
+.nv-live-dot {
+  animation: nvPulse 1.8s ease-in-out infinite;
+}
+
+/* ── Modo oscuro ── */
+:root[data-theme="dark"] .table-container tbody tr:nth-child(even) { background-color: rgba(255,255,255,.02); }
+:root[data-theme="dark"] .table-container tbody tr:hover { background-color: rgba(255,255,255,.045); }
+@keyframes nvRowHighlightDark {
+  0%   { background-color: rgba(16,185,129,.22); }
+  65%  { background-color: rgba(16,185,129,.22); }
+  100% { background-color: transparent; }
+}
+:root[data-theme="dark"] .nv-row-highlight { animation-name: nvRowHighlightDark; }

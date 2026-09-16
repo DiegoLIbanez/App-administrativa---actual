@@ -1,0 +1,469 @@
+import { useState, useEffect, useCallback, useMemo } from 'react'
+import { useCompany } from '../context/CompanyContext'
+import * as empleadosApi from '../api/empleados'
+import * as novedadesApi from '../api/novedades'
+import { hoyISO } from '../utils/fecha'
+import { normalizarConcepto } from '../utils/parseExcel'
+import { exportarExcel } from '../utils/exportarExcel'
+import { Plus, Search, X, Download, Upload, LayoutGrid, List, ArrowUpDown } from 'lucide-react'
+import { PAGE_SIZE, EMPTY } from '../components/empleados/empleadosConstants'
+import EmpleadoKpis from '../components/empleados/EmpleadoKpis'
+import AreaDistribution from '../components/empleados/AreaDistribution'
+import EmpleadoCards from '../components/empleados/EmpleadoCards'
+import EmpleadoTable from '../components/empleados/EmpleadoTable'
+import EmpleadoFormModal from '../components/empleados/EmpleadoFormModal'
+import EmpleadoHistorialModal from '../components/empleados/EmpleadoHistorialModal'
+import DeleteConfirmModal from '../components/ui/DeleteConfirmModal'
+import Paginacion from '../components/ui/Paginacion'
+
+function normalizarNombre(s) {
+  return (s || '')
+    .toString().trim().toLowerCase()
+    .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+    .replace(/\s+/g, ' ')
+}
+
+function levenshtein(a, b) {
+  const m = a.length, n = b.length
+  if (m === 0) return n
+  if (n === 0) return m
+  const dp = Array.from({ length: m + 1 }, () => new Array(n + 1).fill(0))
+  for (let i = 0; i <= m; i++) dp[i][0] = i
+  for (let j = 0; j <= n; j++) dp[0][j] = j
+  for (let i = 1; i <= m; i++) {
+    for (let j = 1; j <= n; j++) {
+      dp[i][j] = a[i - 1] === b[j - 1]
+        ? dp[i - 1][j - 1]
+        : 1 + Math.min(dp[i - 1][j], dp[i][j - 1], dp[i - 1][j - 1])
+    }
+  }
+  return dp[m][n]
+}
+
+export default function Empleados() {
+  const { currentCompany, companyConfig } = useCompany()
+  const [rows, setRows] = useState([])
+  const [novedades, setNovedades] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [search, setSearch] = useState('')
+  const [page, setPage] = useState(1)
+  const [modal, setModal] = useState(null)
+  const [form, setForm] = useState(EMPTY)
+  const [saving, setSaving] = useState(false)
+  const [msg, setMsg] = useState(null)
+  const [deleteId, setDeleteId] = useState(null)
+  const [filterDep, setFilterDep] = useState('')
+  const [filterEstado, setFilterEstado] = useState('')
+  const [filterTab, setFilterTab] = useState('')
+  const [sortBy, setSortBy] = useState('nombre_asc')
+  const [vista, setVista] = useState('tarjetas')
+  const [selectedEmp, setSelectedEmp] = useState(null)
+  const [duplicadoWarning, setDuplicadoWarning] = useState(null)
+  const [fileInputKey, setFileInputKey] = useState(0)
+  const [importing, setImporting] = useState(false)
+  const [importResult, setImportResult] = useState(null)
+
+  const load = useCallback(async () => {
+    setLoading(true)
+    const [{ data }, { data: novData }] = await Promise.all([
+      empleadosApi.listarEmpleados(currentCompany),
+      novedadesApi.listarNovedadesCompleto(currentCompany),
+    ])
+    setRows(data || [])
+    setNovedades(novData || [])
+    setLoading(false)
+  }, [currentCompany])
+
+  useEffect(() => { Promise.resolve().then(() => load()) }, [load])
+
+  const novedadesPorEmpleado = useMemo(() => {
+    const acc = {}
+    novedades.forEach(r => {
+      const k = r.nombre_empleado
+      if (!acc[k]) acc[k] = { novedades: [], diasInc: 0, episodiosInc: 0, porConcepto: {} }
+      acc[k].novedades.push(r)
+      const tipo = normalizarConcepto(r.concepto)
+      if (tipo === 'Incapacidad') {
+        acc[k].episodiosInc++
+        acc[k].diasInc += parseFloat(r.total_dias) || 0
+      }
+      if (!acc[k].porConcepto[tipo]) acc[k].porConcepto[tipo] = { episodios: 0, dias: 0 }
+      acc[k].porConcepto[tipo].episodios++
+      acc[k].porConcepto[tipo].dias += parseFloat(r.total_dias) || 0
+    })
+    return acc
+  }, [novedades])
+
+  const filtered = useMemo(() => {
+    let res = rows.filter(r => {
+      const s = search.toLowerCase()
+      const matchSearch = !s ||
+        r.nombre_completo?.toLowerCase().includes(s) ||
+        r.correo?.toLowerCase().includes(s) ||
+        r.dependencia?.toLowerCase().includes(s) ||
+        r.cargo?.toLowerCase().includes(s)
+      const matchDep = !filterDep || r.dependencia === filterDep
+      const matchEstado = !filterEstado || (filterEstado === 'activos' ? r.activo !== false : r.activo === false)
+      // Tabs rápidos
+      const nov = novedadesPorEmpleado[r.nombre_completo]
+      const matchTab = !filterTab ||
+        (filterTab === 'activos' && r.activo !== false) ||
+        (filterTab === 'inactivos' && r.activo === false) ||
+        (filterTab === 'con_inc' && nov && nov.episodiosInc > 0) ||
+        (filterTab === 'sin_correo' && !r.correo)
+      return matchSearch && matchDep && matchEstado && matchTab
+    })
+    res = [...res].sort((a, b) => {
+      switch (sortBy) {
+        case 'nombre_asc': return (a.nombre_completo || '').localeCompare(b.nombre_completo || '')
+        case 'area_asc': return (a.dependencia || '').localeCompare(b.dependencia || '')
+        case 'reciente': return (b.created_at || '').localeCompare(a.created_at || '')
+        case 'mas_novedades': {
+          const na = novedadesPorEmpleado[a.nombre_completo]?.novedades.length || 0
+          const nb = novedadesPorEmpleado[b.nombre_completo]?.novedades.length || 0
+          return nb - na
+        }
+        default: return 0
+      }
+    })
+    return res
+  }, [rows, search, filterDep, filterEstado, filterTab, sortBy, novedadesPorEmpleado])
+
+  const totalPages = Math.ceil(filtered.length / PAGE_SIZE) || 1
+  const paged = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE)
+
+  const openAdd = () => { setForm(EMPTY); setDuplicadoWarning(null); setModal('add') }
+  const openEdit = (row) => { setForm({ ...row, fecha_ingreso: row.fecha_ingreso || '', fecha_retiro: row.fecha_retiro || '' }); setDuplicadoWarning(null); setModal('edit') }
+
+  const checkDuplicado = (nombre, excludeId = null) => {
+    const norm = normalizarNombre(nombre)
+    if (!norm) return null
+    for (const r of rows) {
+      if (excludeId && r.id === excludeId) continue
+      const rNorm = normalizarNombre(r.nombre_completo)
+      if (rNorm === norm) return { tipo: 'exacto', nombre: r.nombre_completo }
+      if (norm.length > 4 && levenshtein(norm, rNorm) <= 2) return { tipo: 'similar', nombre: r.nombre_completo }
+    }
+    return null
+  }
+
+  const onNombreChange = (e) => {
+    const val = e.target.value
+    setForm(p => ({ ...p, nombre_completo: val }))
+    const dup = checkDuplicado(val, modal === 'edit' ? form.id : null)
+    setDuplicadoWarning(dup)
+  }
+
+  const save = async (forzar = false) => {
+    if (!form.nombre_completo?.trim()) return setMsg({ type: 'error', text: 'El nombre es obligatorio.' })
+    if (form.correo && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.correo)) {
+      return setMsg({ type: 'error', text: 'El correo no tiene un formato válido.' })
+    }
+    const dup = checkDuplicado(form.nombre_completo, modal === 'edit' ? form.id : null)
+    if (dup && dup.tipo === 'exacto' && !forzar) {
+      return setMsg({ type: 'error', text: `Ya existe un empleado llamado "${dup.nombre}". Cambia el nombre o edita el registro existente.` })
+    }
+    setSaving(true)
+    let err
+    const payload = {
+      nombre_completo: form.nombre_completo.trim(),
+      correo: form.correo?.trim() || null,
+      dependencia: form.dependencia || null,
+      activo: form.activo ?? true,
+      cargo: form.cargo?.trim() || null,
+      fecha_ingreso: form.fecha_ingreso || null,
+      // Si quedó marcado como Activo, no debe arrastrar una fecha de retiro
+      // vieja (evita que el dashboard lo siga excluyendo por error).
+      fecha_retiro: form.activo ? null : (form.fecha_retiro || null),
+    }
+    if (modal === 'add') {
+      const { error } = await empleadosApi.crearEmpleado(payload, currentCompany)
+      err = error
+    } else {
+      const { error } = await empleadosApi.actualizarEmpleado(form.id, payload)
+      err = error
+    }
+    setSaving(false)
+    if (err) return setMsg({ type: 'error', text: err.message })
+    setMsg({ type: 'success', text: modal === 'add' ? 'Empleado agregado.' : 'Empleado actualizado.' })
+    setModal(null)
+    load()
+    setTimeout(() => setMsg(null), 3000)
+  }
+
+  const remove = async (id) => {
+    const { error } = await empleadosApi.eliminarEmpleado(id)
+    if (!error) { setDeleteId(null); load() }
+    else setMsg({ type: 'error', text: error.message })
+  }
+
+  const toggleActivo = async (emp) => {
+    const nuevoActivo = emp.activo === false
+    const payload = nuevoActivo
+      ? { activo: true, fecha_retiro: null } // se reactiva: ya no aplica fecha de retiro
+      : { activo: false, fecha_retiro: emp.fecha_retiro || hoyISO() } // se desactiva: registra cuándo, si no la tenía
+    const { error } = await empleadosApi.actualizarEmpleado(emp.id, payload)
+    if (!error) load()
+    else setMsg({ type: 'error', text: error.message })
+  }
+
+  const f = (k) => (e) => {
+    const val = e.target.type === 'checkbox' ? e.target.checked : e.target.value
+    setForm(p => ({ ...p, [k]: val }))
+  }
+
+  const depsEnUso = [...new Set(rows.map(r => r.dependencia).filter(Boolean))].sort()
+  const hasFilter = search || filterDep || filterEstado || filterTab
+  const clearFilters = () => { setSearch(''); setFilterDep(''); setFilterEstado(''); setFilterTab(''); setPage(1) }
+
+  const conteoPorArea = useMemo(() => {
+    const acc = {}
+    rows.forEach(r => { const d = r.dependencia || 'Sin área'; acc[d] = (acc[d] || 0) + 1 })
+    return Object.entries(acc).sort((a, b) => b[1] - a[1])
+  }, [rows])
+  const maxArea = Math.max(1, ...conteoPorArea.map(([, v]) => v))
+
+  const exportExcel = () => {
+    exportarExcel(filtered.map(e => ({
+      'Nombre completo': e.nombre_completo,
+      'Correo': e.correo || '',
+      'Dependencia': e.dependencia || '',
+      'Cargo': e.cargo || '',
+      'Fecha ingreso': e.fecha_ingreso || '',
+      'Activo': e.activo === false ? 'No' : 'Sí',
+      'Fecha retiro': e.fecha_retiro || '',
+    })), {
+      nombreHoja: 'Empleados',
+      nombreArchivo: `Empleados_${hoyISO()}.xlsx`,
+      anchosColumnas: [30, 28, 18, 20, 14, 8, 14],
+    })
+  }
+
+  const handleImportFile = async (e) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    setImporting(true)
+    setImportResult(null)
+    try {
+      // xlsx se carga solo al importar (import dinámico), no en el bundle inicial
+      const XLSX = await import('xlsx')
+      const buf = await file.arrayBuffer()
+      const wb = XLSX.read(buf, { type: 'array' })
+      const ws = wb.Sheets[wb.SheetNames[0]]
+      const data = XLSX.utils.sheet_to_json(ws, { defval: '' })
+
+      let creados = 0, omitidos = 0, errores = 0
+      for (const row of data) {
+        const nombre = (row['Nombre completo'] || row['nombre_completo'] || row['Nombre'] || '').toString().trim()
+        if (!nombre) { omitidos++; continue }
+        const dup = checkDuplicado(nombre)
+        if (dup && dup.tipo === 'exacto') { omitidos++; continue }
+        const correo = (row['Correo'] || row['correo'] || '').toString().trim() || null
+        const dependencia = (row['Dependencia'] || row['dependencia'] || '').toString().trim().toUpperCase() || null
+        const cargo = (row['Cargo'] || row['cargo'] || '').toString().trim() || null
+        const activoRaw = (row['Activo'] || row['activo'] || 'Sí').toString().trim().toLowerCase()
+        const activo = !(activoRaw === 'no' || activoRaw === 'false' || activoRaw === '0')
+        const fecha_retiro = activo ? null : ((row['Fecha retiro'] || row['fecha_retiro'] || '').toString().trim() || null)
+        const { error } = await empleadosApi.crearEmpleado({ nombre_completo: nombre, correo, dependencia, cargo, activo, fecha_retiro }, currentCompany)
+        if (error) errores++; else { creados++; rows.push({ nombre_completo: nombre }) }
+      }
+      setImportResult({ creados, omitidos, errores })
+      load()
+    } catch (err) {
+      setImportResult({ error: err.message || 'Error al leer el archivo.' })
+    } finally {
+      setImporting(false)
+      setFileInputKey(k => k + 1)
+    }
+  }
+
+  // Tabs rápidos de estado (dependen de rows + novedades)
+  const conInc = rows.filter(r => (novedadesPorEmpleado[r.nombre_completo]?.episodiosInc || 0) > 0).length
+  const sinCorreo = rows.filter(r => !r.correo).length
+  const tabs = [
+    { val: '', label: `Todos (${rows.length})` },
+    { val: 'activos', label: `Activos (${rows.filter(r => r.activo !== false).length})` },
+    { val: 'inactivos', label: `Inactivos (${rows.filter(r => r.activo === false).length})` },
+    ...(conInc > 0 ? [{ val: 'con_inc', label: `Con incapacidades (${conInc})` }] : []),
+    ...(sinCorreo > 0 ? [{ val: 'sin_correo', label: `Sin correo (${sinCorreo})` }] : []),
+  ]
+
+  const pagination = totalPages > 1 ? (
+    <Paginacion
+      total={filtered.length} page={page} totalPages={totalPages} onChange={setPage}
+      info={vista === 'tarjetas'
+        ? `Mostrando ${(page - 1) * PAGE_SIZE + 1}–${Math.min(page * PAGE_SIZE, filtered.length)} de ${filtered.length}`
+        : `${filtered.length} empleados`}
+    />
+  ) : null
+
+  return (
+    <div>
+      <div className="page-header" style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', flexWrap: 'wrap', gap: 10 }}>
+        <div>
+          <h1>Empleados</h1>
+          <p>Gestiona el directorio de colaboradores de {companyConfig.nombre}</p>
+        </div>
+        <div style={{ display: 'flex', gap: 8 }}>
+          <button className="btn btn-ghost" onClick={exportExcel} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+            <Download size={14} /> Exportar
+          </button>
+          <label className="btn btn-ghost" style={{ display: 'flex', alignItems: 'center', gap: 6, cursor: 'pointer', margin: 0 }}>
+            <Upload size={14} /> {importing ? 'Importando...' : 'Importar Excel'}
+            <input key={fileInputKey} type="file" accept=".xlsx,.xls,.csv" onChange={handleImportFile} disabled={importing} style={{ display: 'none' }} />
+          </label>
+          <button className="btn btn-primary" onClick={openAdd}><Plus size={15} /> Nuevo empleado</button>
+        </div>
+      </div>
+
+      {msg && <div className={`alert alert-${msg.type}`}>{msg.text}</div>}
+      {importResult && (
+        <div className={`alert alert-${importResult.error ? 'error' : 'success'}`}>
+          {importResult.error
+            ? importResult.error
+            : `Importación completa: ${importResult.creados} creado(s), ${importResult.omitidos} omitido(s) por duplicado o nombre vacío, ${importResult.errores} error(es).`}
+          <button className="btn btn-ghost btn-sm" style={{ marginLeft: 10 }} onClick={() => setImportResult(null)}>Cerrar</button>
+        </div>
+      )}
+
+      {/* ── KPIs dinámicos ── */}
+      <EmpleadoKpis
+        rows={rows}
+        novedadesPorEmpleado={novedadesPorEmpleado}
+        depsEnUso={depsEnUso}
+        setFilterTab={setFilterTab}
+        setFilterEstado={setFilterEstado}
+        setPage={setPage}
+      />
+
+      <AreaDistribution
+        conteoPorArea={conteoPorArea}
+        rows={rows}
+        maxArea={maxArea}
+        filterDep={filterDep}
+        setFilterDep={setFilterDep}
+        setPage={setPage}
+      />
+
+      <div className="card">
+        {/* ── Tabs rápidos de estado ── */}
+        <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 12 }}>
+          {tabs.map(t => (
+            <button key={t.val} onClick={() => { setFilterTab(t.val); setFilterEstado(''); setPage(1) }} style={{
+              padding: '5px 12px', borderRadius: 999, fontSize: 11, cursor: 'pointer',
+              border: filterTab === t.val ? '1.5px solid var(--primary)' : '0.5px solid var(--border)',
+              color: filterTab === t.val ? '#fff' : 'var(--text-muted)',
+              background: filterTab === t.val ? 'var(--primary)' : 'var(--surface, var(--bg))',
+              fontWeight: filterTab === t.val ? 700 : 400, transition: 'all .15s',
+            }}>{t.label}</button>
+          ))}
+        </div>
+
+        <div className="filters-row" style={{ flexWrap: 'wrap', gap: 8 }}>
+          <div style={{ position: 'relative', flex: '1 1 200px', minWidth: 180 }}>
+            <Search size={14} style={{ position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
+            <input
+              className="form-control search-input"
+              style={{ paddingLeft: 32 }}
+              placeholder="Buscar por nombre, correo, área o cargo..."
+              value={search}
+              onChange={e => { setSearch(e.target.value); setPage(1) }}
+            />
+          </div>
+          <select className="form-control" style={{ flex: '0 0 160px' }} value={filterDep} onChange={e => { setFilterDep(e.target.value); setPage(1) }}>
+            <option value="">Todas las áreas</option>
+            {depsEnUso.map(d => <option key={d} value={d}>{d}</option>)}
+          </select>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+            <ArrowUpDown size={13} style={{ color: 'var(--text-muted)' }} />
+            <select className="form-control" style={{ flex: '0 0 180px' }} value={sortBy} onChange={e => setSortBy(e.target.value)}>
+              <option value="nombre_asc">Nombre (A-Z)</option>
+              <option value="area_asc">Área (A-Z)</option>
+              <option value="reciente">Más reciente</option>
+              <option value="mas_novedades">Más novedades</option>
+            </select>
+          </div>
+          {hasFilter && (
+            <button className="btn btn-ghost btn-sm" onClick={clearFilters}>
+              <X size={13} /> Limpiar
+            </button>
+          )}
+          <div style={{ display: 'flex', marginLeft: 'auto', gap: 4, background: 'var(--bg)', borderRadius: 8, padding: 3 }}>
+            <button onClick={() => setVista('tarjetas')} title="Vista tarjetas" style={{ border: 'none', borderRadius: 6, padding: '5px 8px', cursor: 'pointer', background: vista === 'tarjetas' ? 'var(--card-bg, #fff)' : 'transparent', boxShadow: vista === 'tarjetas' ? '0 1px 3px rgba(0,0,0,.1)' : 'none' }}>
+              <LayoutGrid size={14} style={{ color: vista === 'tarjetas' ? 'var(--primary)' : 'var(--text-muted)' }} />
+            </button>
+            <button onClick={() => setVista('tabla')} title="Vista tabla" style={{ border: 'none', borderRadius: 6, padding: '5px 8px', cursor: 'pointer', background: vista === 'tabla' ? 'var(--card-bg, #fff)' : 'transparent', boxShadow: vista === 'tabla' ? '0 1px 3px rgba(0,0,0,.1)' : 'none' }}>
+              <List size={14} style={{ color: vista === 'tabla' ? 'var(--primary)' : 'var(--text-muted)' }} />
+            </button>
+          </div>
+        </div>
+
+        <div style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 10, marginTop: 4 }}>
+          {filtered.length} empleado{filtered.length !== 1 ? 's' : ''}{hasFilter ? ' filtrados' : ''} · Clic en tarjeta para ver historial
+        </div>
+
+        {loading ? (
+          <div className="empty-state"><p>Cargando...</p></div>
+        ) : filtered.length === 0 ? (
+          <div className="empty-state"><p>No hay empleados que coincidan.</p></div>
+        ) : vista === 'tarjetas' ? (
+          <>
+            <EmpleadoCards
+              paged={paged}
+              novedadesPorEmpleado={novedadesPorEmpleado}
+              onSelect={setSelectedEmp}
+              openEdit={openEdit}
+              toggleActivo={toggleActivo}
+              setDeleteId={setDeleteId}
+            />
+            {pagination}
+          </>
+        ) : (
+          <>
+            <EmpleadoTable
+              paged={paged}
+              novedadesPorEmpleado={novedadesPorEmpleado}
+              onSelect={setSelectedEmp}
+              openEdit={openEdit}
+              toggleActivo={toggleActivo}
+              setDeleteId={setDeleteId}
+            />
+            {pagination}
+          </>
+        )}
+      </div>
+
+      {modal && (
+        <EmpleadoFormModal
+          modal={modal}
+          form={form}
+          setForm={setForm}
+          f={f}
+          onNombreChange={onNombreChange}
+          duplicadoWarning={duplicadoWarning}
+          saving={saving}
+          save={save}
+          msg={msg}
+          onClose={() => setModal(null)}
+        />
+      )}
+
+      <DeleteConfirmModal
+        deleteId={deleteId}
+        onClose={() => setDeleteId(null)}
+        onConfirm={remove}
+        message="¿Eliminar este empleado permanentemente? Sus novedades no se eliminarán, pero dejará de aparecer en los formularios."
+        tip={'Tip: si solo quieres que deje de aparecer como activo sin perder el registro, usa "Desactivar" en su lugar.'}
+      />
+
+      {selectedEmp && (
+        <EmpleadoHistorialModal
+          selectedEmp={selectedEmp}
+          novedadesPorEmpleado={novedadesPorEmpleado}
+          onClose={() => setSelectedEmp(null)}
+          onEdit={() => { setSelectedEmp(null); openEdit(selectedEmp) }}
+        />
+      )}
+    </div>
+  )
+}

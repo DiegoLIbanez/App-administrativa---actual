@@ -1,0 +1,465 @@
+import { X, AlertCircle } from 'lucide-react'
+import AnimatedModal from '../ui/AnimatedModal'
+import SearchableSelect from '../ui/SearchableSelect'
+import { PILL_STYLES } from './pillsConstants'
+import { normalizarConcepto, CONCEPTO_COLORS } from '../../utils/parseExcel'
+import { hoyISO, formatDuracion } from '../../utils/fecha'
+import { CONCEPTOS_LIST, ICONOS } from '../../utils/novedadesConstants'
+
+export default function NovedadFormModal({
+  modal, form, setForm, setFormDirty, formError, saving,
+  nuevoPeriodoMode, setNuevoPeriodoMode,
+  empleados, fichasEmpleados, rows, periodosForm, dependencias,
+  sinFechas, minFechaForm, maxFechaForm,
+  f, save, closeModal,
+}) {
+  return (
+    <AnimatedModal open={!!modal} onRequestClose={closeModal}>
+      {modal && (() => {
+        const concepto = form.concepto || 'Incapacidad'
+        const conceptoColor = CONCEPTO_COLORS[normalizarConcepto(concepto)] || '#374151'
+
+        const PillBtn = ({ field, opciones }) => {
+          const val = form[field] || ''
+          const next = () => {
+            const idx = opciones.indexOf(val)
+            setForm(p => ({ ...p, [field]: opciones[(idx + 1) % opciones.length] }))
+            setFormDirty(true)
+          }
+          const pillStyle = (v) => {
+            const lv = (v || '').toLowerCase().trim()
+            if (!v) return { background: 'var(--surface)', color: 'var(--text-muted)', border: '1.5px dashed var(--border)' }
+            if (lv === 'ok' || lv.startsWith('ok-')) return { background: '#DCFCE7', color: '#166534', border: '1.5px solid #86EFAC' }
+            if (lv === 'validar') return { background: '#FEF3C7', color: '#92400E', border: '1.5px solid #FCD34D' }
+            if (lv === 'n/a') return { background: 'var(--bg)', color: '#374151', border: '1.5px solid #D1D5DB' }
+            if (lv === 'sí' || lv === 'si') return { background: '#DBEAFE', color: '#1E40AF', border: '1.5px solid #93C5FD' }
+            if (lv === 'no') return { background: '#FEE2E2', color: '#991B1B', border: '1.5px solid #FCA5A5' }
+            return { background: '#EDE9FE', color: '#5B21B6', border: '1.5px solid #C4B5FD' }
+          }
+          return (
+            <button type="button" onClick={next} title="Clic para cambiar"
+              style={{
+                ...pillStyle(val), padding: '6px 14px', borderRadius: 999, fontSize: 12,
+                fontWeight: 700, cursor: 'pointer', transition: 'all .15s',
+                display: 'inline-flex', alignItems: 'center', gap: 5, whiteSpace: 'nowrap'
+              }}>
+              {val || <span style={{ opacity: .5 }}>— Sin valor —</span>}
+              <span style={{ opacity: .4, fontSize: 10 }}>↻</span>
+            </button>
+          )
+        }
+
+        const OkBtnGroup = ({ field }) => {
+          const ops = ['', 'OK-DIANA', 'OK-ANDRES', 'OK-ALEJANDRO', 'VALIDAR']
+          const val = form[field] || ''
+          return (
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+              {ops.map(op => {
+                const sel = val === op
+                const lop = (op || '').toLowerCase()
+                const col = !op ? '#6B7280' : lop === 'validar' ? '#92400E' : '#166534'
+                const bg = !op ? 'var(--surface)' : lop === 'validar' ? (sel ? '#FEF3C7' : 'var(--surface)') : (sel ? '#DCFCE7' : 'var(--surface)')
+                const brd = !op ? 'var(--border)' : lop === 'validar' ? '#FCD34D' : '#86EFAC'
+                return (
+                  <button key={op || 'none'} type="button"
+                    onClick={() => { setForm(p => ({ ...p, [field]: op })); setFormDirty(true) }}
+                    style={{
+                      padding: '5px 11px', borderRadius: 999, fontSize: 11, fontWeight: 700, cursor: 'pointer',
+                      border: `1.5px solid ${sel ? brd : 'var(--border)'}`, background: sel ? bg : 'var(--surface)',
+                      color: sel ? col : 'var(--text-muted)', transition: 'all .15s',
+                      boxShadow: sel ? `0 0 0 2px ${brd}44` : 'none'
+                    }}>
+                    {op || '—'}
+                  </button>
+                )
+              })}
+            </div>
+          )
+        }
+
+        const campos = [form.nombre_empleado, form.concepto, form.periodo]
+        const pct = Math.round((campos.filter(Boolean).length / campos.length) * 100)
+
+        return (
+          <>
+            {/* Cabecera dinámica */}
+            <div style={{
+              background: `linear-gradient(135deg,${conceptoColor}cc 0%,${conceptoColor}88 100%)`,
+              padding: '22px 24px 16px', borderRadius: '12px 12px 0 0', transition: 'background .4s ease',
+            }}>
+              <div style={{ display: 'flex', alignItems: 'flex-start', gap: 14 }}>
+                <div style={{
+                  width: 56, height: 56, borderRadius: 14, flexShrink: 0,
+                  background: 'rgba(255,255,255,0.2)', display: 'flex', alignItems: 'center',
+                  justifyContent: 'center', fontSize: 28, boxShadow: '0 4px 16px rgba(0,0,0,0.15)'
+                }}>
+                  {ICONOS[concepto] || '📄'}
+                </div>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ color: 'rgba(255,255,255,0.6)', fontSize: 10, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: 3 }}>
+                    {modal === 'add' ? 'Nueva novedad' : 'Editando novedad'}
+                  </div>
+                  <h2 style={{ color: '#fff', margin: '0 0 4px', fontSize: 17, fontWeight: 800, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                    {form.nombre_empleado || 'Selecciona un empleado'}
+                  </h2>
+                  <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
+                    <span style={{ background: 'rgba(255,255,255,0.2)', color: '#fff', padding: '2px 10px', borderRadius: 999, fontSize: 12, fontWeight: 700 }}>
+                      {concepto}
+                    </span>
+                    {form.periodo && <span style={{ color: 'rgba(255,255,255,0.75)', fontSize: 12 }}>📅 {form.periodo}</span>}
+                    {form.total_dias && <span style={{ color: 'rgba(255,255,255,0.75)', fontSize: 12 }}>⏱ {form.total_dias}d</span>}
+                  </div>
+                </div>
+                <button onClick={closeModal} className="modal-close-btn"
+                  style={{
+                    border: 'none', borderRadius: 10, color: '#fff',
+                    cursor: 'pointer', padding: '8px 10px', display: 'flex', alignItems: 'center',
+                    flexShrink: 0, transition: 'background .15s'
+                  }}>
+                  <X size={16} />
+                </button>
+              </div>
+              {/* Barra de progreso */}
+              <div style={{ marginTop: 14 }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
+                  <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.5)', fontWeight: 600 }}>COMPLETADO</span>
+                  <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.75)', fontWeight: 700 }}>{pct}%</span>
+                </div>
+                <div style={{ height: 3, background: 'rgba(255,255,255,0.15)', borderRadius: 99 }}>
+                  <div style={{ height: '100%', borderRadius: 99, background: 'rgba(255,255,255,0.85)', width: `${pct}%`, transition: 'width .3s ease' }} />
+                </div>
+              </div>
+            </div>
+
+            {/* Cuerpo */}
+            <div className="modal-body" style={{ maxHeight: '60vh', overflowY: 'auto', padding: '20px 24px', display: 'flex', flexDirection: 'column', gap: 20 }}>
+
+              {/* S1: Empleado */}
+              <div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
+                  <div style={{ width: 24, height: 24, borderRadius: 6, background: '#EFF6FF', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 13 }}>👤</div>
+                  <span style={{ fontSize: 11, fontWeight: 800, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#374151' }}>Empleado *</span>
+                </div>
+                <SearchableSelect
+                  value={form.nombre_empleado}
+                  onChange={val => { setForm(p => ({ ...p, nombre_empleado: val })); setFormDirty(true) }}
+                  activos={empleados.activos} inactivos={empleados.inactivos}
+                  placeholder="— Seleccionar empleado —"
+                />
+                {form.nombre_empleado && !fichasEmpleados[form.nombre_empleado]?.activo && (
+                  <div style={{
+                    marginTop: 8, display: 'flex', alignItems: 'center', gap: 6,
+                    background: '#FEF3C7', border: '1px solid #FCD34D', color: '#92400E',
+                    borderRadius: 8, padding: '8px 10px', fontSize: 12, fontWeight: 600,
+                  }}>
+                    <AlertCircle size={13} />
+                    Este empleado está inactivo{fichasEmpleados[form.nombre_empleado]?.fecha_retiro
+                      ? ` desde el ${fichasEmpleados[form.nombre_empleado].fecha_retiro}`
+                      : ''}. Solo se pueden registrar novedades con fecha dentro de su periodo activo.
+                  </div>
+                )}
+                {form.nombre_empleado && (() => {
+                  let historial = rows
+                    .filter(r => r.nombre_empleado === form.nombre_empleado && (r.concepto === 'Ingreso' || r.concepto === 'Terminación de Contrato') && r.fecha_inicio)
+                    .sort((a, b) => a.fecha_inicio.localeCompare(b.fecha_inicio))
+                  let esRespaldoFicha = false
+                  const ficha = fichasEmpleados[form.nombre_empleado]
+
+                  // Caso 1: no hay ninguna novedad de Ingreso/Terminación (lo más
+                  // común, porque muchos empleados se cargaron directo en la
+                  // pestaña Empleados). Se arma un historial "sintético" completo
+                  // a partir de su ficha (fecha_ingreso / fecha_retiro).
+                  if (historial.length === 0 && ficha?.fecha_ingreso) {
+                    esRespaldoFicha = true
+                    historial = [{ id: 'ficha-ingreso', concepto: 'Ingreso', fecha_inicio: ficha.fecha_ingreso }]
+                    if (ficha.activo === false && ficha.fecha_retiro) {
+                      historial.push({ id: 'ficha-retiro', concepto: 'Terminación de Contrato', fecha_inicio: ficha.fecha_retiro })
+                    }
+                  }
+
+                  // Caso 2: SÍ hay novedades, pero quedaron "a medias" — el último
+                  // tramo es un Ingreso sin su Terminación después (por ejemplo,
+                  // se cargó el Ingreso por Excel pero el retiro solo se marcó en
+                  // Empleados, nunca como novedad). Sin esto, se mostraría a la
+                  // persona como si siguiera activa aunque ya no lo esté. Se
+                  // completa con la fecha de retiro real de la ficha.
+                  const ultimoTramo = historial[historial.length - 1]
+                  if (ultimoTramo && ultimoTramo.concepto === 'Ingreso'
+                      && ficha && ficha.activo === false && ficha.fecha_retiro
+                      && ficha.fecha_retiro >= ultimoTramo.fecha_inicio) {
+                    esRespaldoFicha = true
+                    historial = [...historial, { id: 'ficha-retiro', concepto: 'Terminación de Contrato', fecha_inicio: ficha.fecha_retiro }]
+                  }
+
+                  if (historial.length === 0) return null
+                  const haVuelto = historial.filter(h => h.concepto === 'Ingreso').length > 1
+                  const hoy = hoyISO()
+                  return (
+                    <div style={{ marginTop: 10, background: 'var(--bg)', border: '1px solid var(--border)', borderRadius: 10, padding: '12px 14px' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
+                        <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Historial ingreso / salida</span>
+                        {haVuelto && <span style={PILL_STYLES.validar}>🔁 Ha vuelto</span>}
+                      </div>
+                      {esRespaldoFicha && (
+                        <div style={{ fontSize: 10.5, color: 'var(--text-muted)', fontStyle: 'italic', marginBottom: 10, marginTop: -6 }}>
+                          Tomado de su ficha en Empleados (no tiene novedades de Ingreso/Terminación registradas).
+                        </div>
+                      )}
+                      <div>
+                        {historial.map((h, idx) => {
+                          const esIngreso = h.concepto === 'Ingreso'
+                          const esUltimo = idx === historial.length - 1
+                          const fechaFinTramo = esUltimo ? (esIngreso ? hoy : null) : historial[idx + 1].fecha_inicio
+                          let duracionTexto = null
+                          if (fechaFinTramo) {
+                            const dur = formatDuracion(h.fecha_inicio, fechaFinTramo)
+                            duracionTexto = esIngreso && esUltimo ? `Lleva ${dur} (actual)` : esIngreso ? `Estuvo ${dur}` : `Fuera ${dur}`
+                          }
+                          return (
+                            <div key={h.id} style={{ display: 'flex', gap: 10 }}>
+                              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                                <div style={{ width: 8, height: 8, borderRadius: '50%', background: esIngreso ? '#22C55E' : '#EF4444', marginTop: 3, flexShrink: 0 }} />
+                                {!esUltimo && <div style={{ width: 1, flex: 1, background: 'var(--border)', minHeight: 28 }} />}
+                              </div>
+                              <div style={{ paddingBottom: esUltimo ? 0 : 16 }}>
+                                <div style={{ fontSize: 12.5, fontWeight: 600, color: 'var(--text)' }}>{esIngreso ? 'Ingreso' : 'Salida'} — {h.fecha_inicio}</div>
+                                {duracionTexto && (
+                                  <div style={{ fontSize: 11.5, color: esIngreso && esUltimo ? '#166534' : 'var(--text-muted)', fontWeight: esIngreso && esUltimo ? 600 : 400, marginTop: 1 }}>{duracionTexto}</div>
+                                )}
+                              </div>
+                            </div>
+                          )
+                        })}
+                      </div>
+                    </div>
+                  )
+                })()}
+              </div>
+
+              <div style={{ height: 1, background: 'var(--border)' }} />
+
+              {/* S2: Concepto */}
+              <div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
+                  <div style={{ width: 24, height: 24, borderRadius: 6, background: '#FEF9C3', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 13 }}>📋</div>
+                  <span style={{ fontSize: 11, fontWeight: 800, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#374151' }}>Concepto *</span>
+                </div>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 14 }}>
+                  {CONCEPTOS_LIST.map(c => {
+                    const sel = form.concepto === c
+                    const col = CONCEPTO_COLORS[normalizarConcepto(c)] || '#374151'
+                    return (
+                      <button key={c} type="button"
+                        onClick={() => { setForm(p => ({ ...p, concepto: c })); setFormDirty(true) }}
+                        style={{
+                          padding: '5px 12px', borderRadius: 999, fontSize: 12, fontWeight: 600, cursor: 'pointer',
+                          border: sel ? `2px solid ${col}` : '1.5px solid var(--border)',
+                          background: sel ? col + '22' : 'var(--surface)',
+                          color: sel ? col : 'var(--text-muted)',
+                          transition: 'all .15s',
+                          boxShadow: sel ? `0 0 0 2px ${col}33` : 'none',
+                          transform: sel ? 'translateY(-1px)' : 'none',
+                        }}>
+                        {ICONOS[c] || '📄'} {c}
+                      </button>
+                    )
+                  })}
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 12 }}>
+                  <div>
+                    <label style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-muted)', marginBottom: 5, display: 'block' }}>Período (YYYY-MM)</label>
+                    <select className="form-control"
+                      value={nuevoPeriodoMode ? '__nuevo__' : (form.periodo || '')}
+                      onChange={e => {
+                        const v = e.target.value
+                        if (v === '__nuevo__') {
+                          setNuevoPeriodoMode(true)
+                          setForm(p => ({ ...p, periodo: '' }))
+                        } else {
+                          setNuevoPeriodoMode(false)
+                          setForm(p => ({ ...p, periodo: v }))
+                        }
+                        setFormDirty(true)
+                      }}>
+                      <option value="">— Sin periodo —</option>
+                      {periodosForm.map(p => <option key={p} value={p}>{p}</option>)}
+                      <option value="__nuevo__">+ Ingresar nuevo…</option>
+                    </select>
+                    {nuevoPeriodoMode && (
+                      <input className="form-control" style={{ marginTop: 6 }} placeholder="YYYY-MM (ej: 2025-06)"
+                        value={form.periodo || ''}
+                        onChange={e => { setForm(p => ({ ...p, periodo: e.target.value })); setFormDirty(true) }}
+                        autoFocus />
+                    )}
+                  </div>
+                  <div>
+                    <label style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-muted)', marginBottom: 5, display: 'block' }}>Dependencia / Área</label>
+                    <select className="form-control" value={form.dependencia || ''} onChange={f('dependencia')}>
+                      <option value="">— Seleccionar área —</option>
+                      {dependencias.map(d => <option key={d} value={d}>{d}</option>)}
+                    </select>
+                  </div>
+                  <div>
+                    <label style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-muted)', marginBottom: 5, display: 'block' }}>Diagnóstico (código)</label>
+                    <input className="form-control" placeholder="Ej: J06X" value={form.diagnostico || ''} onChange={f('diagnostico')} />
+                  </div>
+                </div>
+              </div>
+
+              <div style={{ height: 1, background: 'var(--border)' }} />
+
+              {/* S3: Fechas */}
+              <div style={{ background: 'var(--bg,#F9FAFB)', borderRadius: 10, padding: '14px 16px', border: '1px solid var(--border)' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
+                  <div style={{ width: 24, height: 24, borderRadius: 6, background: 'var(--bg)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 13 }}>📅</div>
+                  <span style={{ fontSize: 11, fontWeight: 800, letterSpacing: '0.08em', textTransform: 'uppercase', color: sinFechas ? '#D1D5DB' : '#374151' }}>
+                    Fechas {sinFechas && <span style={{ fontWeight: 400, textTransform: 'none', fontSize: 10, marginLeft: 4 }}>— no aplica para este concepto</span>}
+                  </span>
+                </div>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 80px', gap: 12, opacity: sinFechas ? .35 : 1, pointerEvents: sinFechas ? 'none' : 'auto' }}>
+                  <div>
+                    <label style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-muted)', marginBottom: 5, display: 'block' }}>↘ Inicio</label>
+                    <input className="form-control" type="date" value={form.fecha_inicio || ''} onChange={f('fecha_inicio')} disabled={sinFechas}
+                      min={minFechaForm} max={maxFechaForm} />
+                  </div>
+                  <div>
+                    <label style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-muted)', marginBottom: 5, display: 'block' }}>↗ Fin</label>
+                    <input className="form-control" type="date" value={form.fecha_fin || ''} onChange={f('fecha_fin')} disabled={sinFechas}
+                      min={minFechaForm} max={maxFechaForm} />
+                  </div>
+                  <div>
+                    <label style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-muted)', marginBottom: 5, display: 'block', whiteSpace: 'nowrap' }}>
+                      Días {form.fecha_inicio && form.fecha_fin && !sinFechas && <span style={{ color: 'var(--primary)' }}>●</span>}
+                    </label>
+                    <input className="form-control" type="number" value={form.total_dias || ''} onChange={f('total_dias')}
+                      disabled={sinFechas}
+                      style={form.fecha_inicio && form.fecha_fin && !sinFechas ? { background: 'var(--bg)', color: 'var(--primary)', fontWeight: 800, textAlign: 'center' } : { textAlign: 'center' }} />
+                  </div>
+                </div>
+                {!sinFechas && (minFechaForm || maxFechaForm) && (
+                  <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 6 }}>
+                    Rango permitido para {form.nombre_empleado}: {minFechaForm || '(sin ingreso registrado)'} → {maxFechaForm || 'hoy'}
+                  </div>
+                )}
+
+                {(form.concepto === 'LNR' || form.concepto === 'LR') && (
+                  <div style={{ marginTop: 12, paddingTop: 12, borderTop: '1px dashed var(--border)' }}>
+                    <label style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-muted)', marginBottom: 6, display: 'block' }}>Jornada</label>
+                    <div style={{ display: 'flex', gap: 6 }}>
+                      {[
+                        { v: '', label: 'Día completo' },
+                        { v: 'Medio día', label: 'Medio día' },
+                      ].map(op => {
+                        const sel = (form.jornada || '') === op.v
+                        return (
+                          <button key={op.v || 'completo'} type="button"
+                            onClick={() => { setForm(p => ({ ...p, jornada: op.v })); setFormDirty(true) }}
+                            style={{
+                              padding: '6px 14px', borderRadius: 999, fontSize: 12, fontWeight: 600, cursor: 'pointer',
+                              border: sel ? '2px solid var(--primary)' : '1.5px solid var(--border)',
+                              background: sel ? 'var(--primary-light)' : 'var(--surface)',
+                              color: sel ? 'var(--primary)' : 'var(--text-muted)',
+                              transition: 'all .15s',
+                            }}>
+                            {op.v === 'Medio día' ? '🕐 ' : '📆 '}{op.label}
+                          </button>
+                        )
+                      })}
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              <div style={{ height: 1, background: 'var(--border)' }} />
+
+              {/* S4: Validaciones */}
+              <div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 14 }}>
+                  <div style={{ width: 24, height: 24, borderRadius: 6, background: '#F0FDF4', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 13 }}>✅</div>
+                  <span style={{ fontSize: 11, fontWeight: 800, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#374151' }}>Validaciones</span>
+                  <span style={{ fontSize: 10, color: '#6B7280' }}>— clic en pill para ciclar</span>
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 12 }}>
+                    {[
+                      { label: 'Válid. Incapacidad', field: 'validacion_incapacidad', ops: ['', 'OK', 'Validar', 'N/A'] },
+                      { label: 'Prórroga', field: 'prorroga', ops: ['', 'Sí', 'No', 'N/A'] },
+                      { label: 'Rad. Incapacidad', field: 'radicacion_incapacidad', ops: ['', 'OK', 'Validar', 'N/A'] },
+                    ].map(({ label, field, ops }) => (
+                      <div key={field}>
+                        <label style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', marginBottom: 6, display: 'block' }}>{label}</label>
+                        <PillBtn field={field} opciones={ops} />
+                      </div>
+                    ))}
+                  </div>
+                  {[
+                    { label: 'Obs. Contabilidad', field: 'observacion_contabilidad' },
+                    { label: 'Nómina Electrónica', field: 'nomina_electronica' },
+                    { label: 'Seguridad Social', field: 'seguridad_social' },
+                  ].map(({ label, field }) => (
+                    <div key={field}>
+                      <label style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', marginBottom: 6, display: 'block' }}>{label}</label>
+                      <OkBtnGroup field={field} />
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div style={{ height: 1, background: 'var(--border)' }} />
+
+              {/* S5: Observación */}
+              <div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
+                  <div style={{ width: 24, height: 24, borderRadius: 6, background: 'var(--bg)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 13 }}>💬</div>
+                  <span style={{ fontSize: 11, fontWeight: 800, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#374151' }}>Observación</span>
+                  <span style={{ fontSize: 10, color: '#6B7280' }}>— opcional</span>
+                </div>
+                <textarea className="form-control" rows={3}
+                  value={form.observacion || ''} onChange={f('observacion')}
+                  placeholder="Notas adicionales sobre esta novedad..."
+                  style={{ resize: 'vertical', lineHeight: 1.6 }} />
+              </div>
+
+            </div>
+
+            {/* Footer */}
+            <div style={{
+              borderTop: '1px solid var(--border)', padding: '14px 24px',
+              display: 'flex', flexDirection: 'column', gap: 10,
+              background: 'var(--surface)', borderRadius: '0 0 12px 12px'
+            }}>
+              {formError && (
+                <div style={{
+                  display: 'flex', alignItems: 'flex-start', gap: 8,
+                  background: '#FEE2E2', border: '1px solid #FCA5A5', color: '#991B1B',
+                  borderRadius: 8, padding: '10px 12px', fontSize: 12.5, lineHeight: 1.5
+                }}>
+                  <AlertCircle size={16} style={{ flexShrink: 0, marginTop: 1 }} />
+                  <span>{formError}</span>
+                </div>
+              )}
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 10 }}>
+                <div style={{ fontSize: 11, color: 'var(--text-muted)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', minWidth: 0 }}>
+                  {[
+                    form.nombre_empleado && '👤 ' + form.nombre_empleado.split(' ')[0],
+                    form.concepto && form.concepto,
+                    form.periodo && '📅 ' + form.periodo,
+                    form.total_dias && '⏱ ' + form.total_dias + 'd',
+                  ].filter(Boolean).join(' · ') || 'Completa los campos obligatorios *'}
+                </div>
+                <div style={{ display: 'flex', gap: 8, flexShrink: 0 }}>
+                  <button className="btn btn-ghost" onClick={closeModal}>Cancelar</button>
+                  <button className="btn btn-primary" onClick={save} disabled={saving}
+                    style={{ minWidth: 130, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
+                    {saving ? <><span>⏳</span> Guardando...</> : <><span>{modal === 'add' ? '✅' : '💾'}</span>{modal === 'add' ? 'Crear novedad' : 'Guardar cambios'}</>}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </>
+        )
+      })()}
+    </AnimatedModal>
+  )
+}
