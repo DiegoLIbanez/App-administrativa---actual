@@ -1,3 +1,5 @@
+import PageTitle from '../components/ui/PageTitle'
+import { Scale as TitleIcon } from 'lucide-react'
 import { useState, useEffect, useCallback, useMemo } from 'react'
 import { useCompany } from '../context/CompanyContext'
 import * as procesosApi from '../api/procesosDisciplinarios'
@@ -334,7 +336,7 @@ export default function ProcesosDisciplinarios() {
     <div>
       <div className="page-header" style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', flexWrap: 'wrap', gap: 10 }}>
         <div>
-          <h1>⚖️ Procesos Disciplinarios</h1>
+          <PageTitle icon={TitleIcon}>Procesos Disciplinarios</PageTitle>
           <p>Registro y seguimiento de faltas, disciplina y citaciones</p>
         </div>
         <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>

@@ -29,12 +29,12 @@ export default function NovedadFormModal({
           const pillStyle = (v) => {
             const lv = (v || '').toLowerCase().trim()
             if (!v) return { background: 'var(--surface)', color: 'var(--text-muted)', border: '1.5px dashed var(--border)' }
-            if (lv === 'ok' || lv.startsWith('ok-')) return { background: '#DCFCE7', color: '#166534', border: '1.5px solid #86EFAC' }
-            if (lv === 'validar') return { background: '#FEF3C7', color: '#92400E', border: '1.5px solid #FCD34D' }
+            if (lv === 'ok' || lv.startsWith('ok-')) return { background: 'var(--success-bg)', color: 'var(--success-text)', border: '1.5px solid color-mix(in srgb, var(--success) 35%, transparent)' }
+            if (lv === 'validar') return { background: 'var(--warning-bg)', color: 'var(--warning-text)', border: '1.5px solid color-mix(in srgb, var(--warning) 40%, transparent)' }
             if (lv === 'n/a') return { background: 'var(--bg)', color: '#374151', border: '1.5px solid #D1D5DB' }
-            if (lv === 'sí' || lv === 'si') return { background: '#DBEAFE', color: '#1E40AF', border: '1.5px solid #93C5FD' }
-            if (lv === 'no') return { background: '#FEE2E2', color: '#991B1B', border: '1.5px solid #FCA5A5' }
-            return { background: '#EDE9FE', color: '#5B21B6', border: '1.5px solid #C4B5FD' }
+            if (lv === 'sí' || lv === 'si') return { background: 'var(--info-bg)', color: 'var(--info-text)', border: '1.5px solid color-mix(in srgb, var(--info) 35%, transparent)' }
+            if (lv === 'no') return { background: 'var(--danger-bg)', color: 'var(--danger-text)', border: '1.5px solid color-mix(in srgb, var(--danger) 35%, transparent)' }
+            return { background: 'var(--purple-bg)', color: 'var(--purple-text)', border: '1.5px solid color-mix(in srgb, var(--purple) 35%, transparent)' }
           }
           return (
             <button type="button" onClick={next} title="Clic para cambiar"
@@ -57,9 +57,9 @@ export default function NovedadFormModal({
               {ops.map(op => {
                 const sel = val === op
                 const lop = (op || '').toLowerCase()
-                const col = !op ? '#6B7280' : lop === 'validar' ? '#92400E' : '#166534'
-                const bg = !op ? 'var(--surface)' : lop === 'validar' ? (sel ? '#FEF3C7' : 'var(--surface)') : (sel ? '#DCFCE7' : 'var(--surface)')
-                const brd = !op ? 'var(--border)' : lop === 'validar' ? '#FCD34D' : '#86EFAC'
+                const col = !op ? '#6B7280' : lop === 'validar' ? 'var(--warning-text)' : 'var(--success-text)'
+                const bg = !op ? 'var(--surface)' : lop === 'validar' ? (sel ? 'var(--warning-bg)' : 'var(--surface)') : (sel ? 'var(--success-bg)' : 'var(--surface)')
+                const brd = !op ? 'var(--border)' : lop === 'validar' ? 'color-mix(in srgb, var(--warning) 40%, transparent)' : 'color-mix(in srgb, var(--success) 35%, transparent)'
                 return (
                   <button key={op || 'none'} type="button"
                     onClick={() => { setForm(p => ({ ...p, [field]: op })); setFormDirty(true) }}
@@ -67,7 +67,7 @@ export default function NovedadFormModal({
                       padding: '5px 11px', borderRadius: 999, fontSize: 11, fontWeight: 700, cursor: 'pointer',
                       border: `1.5px solid ${sel ? brd : 'var(--border)'}`, background: sel ? bg : 'var(--surface)',
                       color: sel ? col : 'var(--text-muted)', transition: 'all .15s',
-                      boxShadow: sel ? `0 0 0 2px ${brd}44` : 'none'
+                      boxShadow: sel ? `0 0 0 2px ${brd}` : 'none'
                     }}>
                     {op || '—'}
                   </button>
@@ -137,7 +137,7 @@ export default function NovedadFormModal({
               {/* S1: Empleado */}
               <div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
-                  <div style={{ width: 24, height: 24, borderRadius: 6, background: '#EFF6FF', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 13 }}>👤</div>
+                  <div style={{ width: 24, height: 24, borderRadius: 6, background: 'var(--info-bg)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 13 }}>👤</div>
                   <span style={{ fontSize: 11, fontWeight: 800, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#374151' }}>Empleado *</span>
                 </div>
                 <SearchableSelect
@@ -149,7 +149,7 @@ export default function NovedadFormModal({
                 {form.nombre_empleado && !fichasEmpleados[form.nombre_empleado]?.activo && (
                   <div style={{
                     marginTop: 8, display: 'flex', alignItems: 'center', gap: 6,
-                    background: '#FEF3C7', border: '1px solid #FCD34D', color: '#92400E',
+                    background: 'var(--warning-bg)', border: '1px solid color-mix(in srgb, var(--warning) 40%, transparent)', color: 'var(--warning-text)',
                     borderRadius: 8, padding: '8px 10px', fontSize: 12, fontWeight: 600,
                   }}>
                     <AlertCircle size={13} />
@@ -224,7 +224,7 @@ export default function NovedadFormModal({
                               <div style={{ paddingBottom: esUltimo ? 0 : 16 }}>
                                 <div style={{ fontSize: 12.5, fontWeight: 600, color: 'var(--text)' }}>{esIngreso ? 'Ingreso' : 'Salida'} — {h.fecha_inicio}</div>
                                 {duracionTexto && (
-                                  <div style={{ fontSize: 11.5, color: esIngreso && esUltimo ? '#166534' : 'var(--text-muted)', fontWeight: esIngreso && esUltimo ? 600 : 400, marginTop: 1 }}>{duracionTexto}</div>
+                                  <div style={{ fontSize: 11.5, color: esIngreso && esUltimo ? 'var(--success-text)' : 'var(--text-muted)', fontWeight: esIngreso && esUltimo ? 600 : 400, marginTop: 1 }}>{duracionTexto}</div>
                                 )}
                               </div>
                             </div>
@@ -376,7 +376,7 @@ export default function NovedadFormModal({
               {/* S4: Validaciones */}
               <div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 14 }}>
-                  <div style={{ width: 24, height: 24, borderRadius: 6, background: '#F0FDF4', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 13 }}>✅</div>
+                  <div style={{ width: 24, height: 24, borderRadius: 6, background: 'var(--success-bg)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 13 }}>✅</div>
                   <span style={{ fontSize: 11, fontWeight: 800, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#374151' }}>Validaciones</span>
                   <span style={{ fontSize: 10, color: '#6B7280' }}>— clic en pill para ciclar</span>
                 </div>
@@ -432,7 +432,7 @@ export default function NovedadFormModal({
               {formError && (
                 <div style={{
                   display: 'flex', alignItems: 'flex-start', gap: 8,
-                  background: '#FEE2E2', border: '1px solid #FCA5A5', color: '#991B1B',
+                  background: 'var(--danger-bg)', border: '1px solid color-mix(in srgb, var(--danger) 35%, transparent)', color: 'var(--danger-text)',
                   borderRadius: 8, padding: '10px 12px', fontSize: 12.5, lineHeight: 1.5
                 }}>
                   <AlertCircle size={16} style={{ flexShrink: 0, marginTop: 1 }} />

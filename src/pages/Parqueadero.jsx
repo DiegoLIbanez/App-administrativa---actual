@@ -1,3 +1,5 @@
+import PageTitle from '../components/ui/PageTitle'
+import { ParkingSquare as TitleIcon } from 'lucide-react'
 import { useState, useEffect, useCallback, useMemo } from 'react'
 import { useCompany } from '../context/CompanyContext'
 import * as parqueaderoApi from '../api/parqueadero'
@@ -228,7 +230,7 @@ export default function Parqueadero() {
       {/* ── Header ── */}
       <div className="page-header" style={{display:'flex',alignItems:'flex-start',justifyContent:'space-between',flexWrap:'wrap',gap:10}}>
         <div>
-          <h1>Parqueadero</h1>
+          <PageTitle icon={TitleIcon}>Parqueadero</PageTitle>
           <p>Registro de vehículos y control de parqueadero</p>
         </div>
         <div style={{display:'flex',gap:8,flexWrap:'wrap'}}>
@@ -238,12 +240,12 @@ export default function Parqueadero() {
           <button className="btn btn-ghost"
             disabled={!filterMes||!filterAnio}
             title={!filterMes||!filterAnio?'Filtra por mes y año para habilitar':`Copiar ${filterMes} ${filterAnio} → siguiente mes`}
-            style={{background:'#F0FDF4',color:'#166534',border:'1px solid #86EFAC'}}
+            style={{background:'var(--success-bg)',color:'var(--success-text)',border:'1px solid color-mix(in srgb, var(--success) 35%, transparent)'}}
             onClick={abrirModalCopiar}>
             📋 Copiar al siguiente mes
           </button>
           <button className="btn btn-ghost" disabled={sendingReport||filtered.length===0}
-            style={{background:'#EEF2FF',color:'#4338CA',border:'1px solid #C7D2FE'}}
+            style={{background:'var(--info-bg)',color:'var(--info-text)',border:'1px solid color-mix(in srgb, var(--info) 35%, transparent)'}}
             onClick={async()=>{
               setSendingReport(true)
               await enviarReporte(filtered, filterMes, filterAnio, () => { load(); setSendingReport(false) })
@@ -267,7 +269,7 @@ export default function Parqueadero() {
 
       {/* ── Alerta sin reporte ── */}
       {!loading && sinReporte > 0 && (
-        <div style={{display:'flex',alignItems:'center',gap:8,padding:'9px 14px',borderRadius:8,background:'#EEF2FF',border:'1px solid #C7D2FE',color:'#3730A3',fontSize:12,fontWeight:500,marginBottom:12,flexWrap:'wrap',animation:'fadeIn .3s ease'}}>
+        <div style={{display:'flex',alignItems:'center',gap:8,padding:'9px 14px',borderRadius:8,background:'var(--info-bg)',border:'1px solid color-mix(in srgb, var(--info) 35%, transparent)',color:'#3730A3',fontSize:12,fontWeight:500,marginBottom:12,flexWrap:'wrap',animation:'fadeIn .3s ease'}}>
           📤 <span><strong>{sinReporte}</strong> registro{sinReporte!==1?'s':''} de <strong>{mesActual}</strong> sin envío de reporte</span>
           <button onClick={()=>{setFilterTab('sin_rep');setFilterMes(mesActual);setFilterAnio(anioActual);setPage(1)}}
             style={{marginLeft:'auto',background:'none',border:'none',color:'#3730A3',fontSize:12,cursor:'pointer',fontWeight:700,textDecoration:'underline',padding:0}}>

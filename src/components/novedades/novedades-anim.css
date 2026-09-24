@@ -27,32 +27,16 @@
 .nv-row-highlight {
   animation: nvRowHighlight 2.2s ease-out forwards;
 }
-.table-container {
-  max-height: 70vh;
-  overflow: auto;
-}
-.table-container thead th {
-  position: sticky;
-  top: 0;
-  z-index: 2;
-  background: var(--surface);
-  box-shadow: 0 1px 0 0 var(--border);
-}
-.table-container tbody tr {
-  transition: background-color 0.15s ease;
-}
-.table-container tbody tr:nth-child(even) {
-  background-color: rgba(0, 0, 0, 0.025);
-}
-.table-container tbody tr:hover {
-  background-color: rgba(0, 0, 0, 0.06);
-}
+/* Novedades: tabla alta con scroll vertical propio (el encabezado queda fijo) */
+.table-container--tall { max-height: 70vh; overflow: auto; }
+/* El resaltado de filas (hover) y la columna fija viven en App.css:
+   así todas las tablas se ven igual, en claro y en oscuro. */
 .nv-live-dot {
   animation: nvPulse 1.8s ease-in-out infinite;
 }
 
 /* ── Modo oscuro ── */
-:root[data-theme="dark"] .table-container tbody tr:nth-child(even) { background-color: rgba(255,255,255,.02); }
+:root[data-theme="dark"] .table-container tbody tr:nth-child(even):not(:hover) { --row-bg: rgba(255,255,255,.02); }
 :root[data-theme="dark"] .table-container tbody tr:hover { background-color: rgba(255,255,255,.045); }
 @keyframes nvRowHighlightDark {
   0%   { background-color: rgba(16,185,129,.22); }

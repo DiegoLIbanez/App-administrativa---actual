@@ -409,3 +409,179 @@
   color: var(--text-muted);
 }
 
+/* =============================================================
+   MODO OSCURO PARA EL SIDEBAR:
+   Todas las letras y textos en color blanco puro y nítido
+   ============================================================= */
+:root[data-theme="dark"] .sidebar {
+  background: var(--surface, #131B2C);
+  border-right-color: var(--border, #263248);
+}
+
+:root[data-theme="dark"] .brand-text {
+  color: #FFFFFF !important;
+}
+
+:root[data-theme="dark"] .brand-text em {
+  color: #FFFFFF !important;
+  font-weight: 800;
+}
+
+:root[data-theme="dark"] .sidebar-close,
+:root[data-theme="dark"] .sidebar-collapse-btn {
+  color: #FFFFFF !important;
+}
+
+:root[data-theme="dark"] .company-switcher-btn {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.12);
+}
+
+:root[data-theme="dark"] .company-switcher-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.25);
+}
+
+:root[data-theme="dark"] .company-label-micro {
+  color: #FFFFFF !important;
+  opacity: 0.85;
+}
+
+:root[data-theme="dark"] .company-name-bold {
+  color: #FFFFFF !important;
+}
+
+:root[data-theme="dark"] .company-chevron {
+  color: #FFFFFF !important;
+}
+
+:root[data-theme="dark"] .company-dropdown-menu {
+  background: #131B2C;
+  border-color: #263248;
+}
+
+:root[data-theme="dark"] .company-dropdown-header {
+  color: #FFFFFF !important;
+  opacity: 0.8;
+}
+
+:root[data-theme="dark"] .company-item-title {
+  color: #FFFFFF !important;
+}
+
+:root[data-theme="dark"] .company-item-sub {
+  color: #E2E8F0 !important;
+}
+
+:root[data-theme="dark"] .company-badge-single {
+  color: #FFFFFF !important;
+}
+
+:root[data-theme="dark"] .sb-search-input {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.15);
+  color: #FFFFFF !important;
+}
+
+:root[data-theme="dark"] .sb-search-input::placeholder {
+  color: #94A3B8 !important;
+}
+
+:root[data-theme="dark"] .sb-search-icon {
+  color: #E2E8F0 !important;
+}
+
+:root[data-theme="dark"] .sb-section-label {
+  color: #FFFFFF !important;
+  opacity: 0.9 !important;
+}
+
+:root[data-theme="dark"] .sb-divider {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+:root[data-theme="dark"] .nav-item {
+  color: #FFFFFF !important;
+}
+
+:root[data-theme="dark"] .nav-item:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: #FFFFFF !important;
+}
+
+:root[data-theme="dark"] .nav-item--active {
+  background: rgba(47, 111, 237, 0.28) !important;
+  color: #FFFFFF !important;
+}
+
+:root[data-theme="dark"] .nav-item--active .nav-label {
+  color: #FFFFFF !important;
+  font-weight: 700;
+}
+
+:root[data-theme="dark"] .nav-label {
+  color: #FFFFFF !important;
+}
+
+:root[data-theme="dark"] .nav-icon-box {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+:root[data-theme="dark"] .nav-item:hover .nav-icon-box {
+  background: rgba(255, 255, 255, 0.16);
+}
+
+:root[data-theme="dark"] .nav-item--active .nav-icon-box {
+  background: #2563EB !important;
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.45) !important;
+}
+
+:root[data-theme="dark"] .nav-badge {
+  background: rgba(255, 255, 255, 0.18);
+  color: #FFFFFF !important;
+}
+
+:root[data-theme="dark"] .sidebar-footer {
+  border-top-color: rgba(255, 255, 255, 0.08);
+}
+
+:root[data-theme="dark"] .account-trigger {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.12);
+  color: #FFFFFF !important;
+}
+
+:root[data-theme="dark"] .account-name {
+  color: #FFFFFF !important;
+}
+
+:root[data-theme="dark"] .account-email {
+  color: #CBD5E1 !important;
+}
+
+:root[data-theme="dark"] .account-chevron {
+  color: #FFFFFF !important;
+}
+
+:root[data-theme="dark"] .account-dropdown {
+  background: #131B2C;
+  border-color: #263248;
+}
+
+:root[data-theme="dark"] .account-dropdown-item {
+  color: #FFFFFF !important;
+}
+
+:root[data-theme="dark"] .account-dropdown-item:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+:root[data-theme="dark"] .version-tag {
+  color: #CBD5E1 !important;
+}
+
+:root[data-theme="dark"] .version-text {
+  color: #CBD5E1 !important;
+}
+
+

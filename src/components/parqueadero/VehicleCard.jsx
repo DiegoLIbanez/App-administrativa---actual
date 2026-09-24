@@ -7,8 +7,8 @@ export default function VehicleCard({ row, idx, onView, onEdit, onDelete, onHist
   return (
     <div className="park-card" style={{
       animationDelay: `${Math.min(idx, 8) * 0.04}s`,
-      background: row.retirado ? '#FEE2E2' : 'var(--surface)', borderRadius: 14,
-      border: `${row.retirado ? '2px solid #DC2626' : '1px solid ' + (isExento ? '#86EFAC' : 'var(--border)')}`,
+      background: row.retirado ? 'var(--danger-bg)' : 'var(--surface)', borderRadius: 14,
+      border: `${row.retirado ? '2px solid #DC2626' : '1px solid ' + (isExento ? 'color-mix(in srgb, var(--success) 35%, transparent)' : 'var(--border)')}`,
       overflow: 'hidden', transition: 'box-shadow .18s, transform .18s',
       display: 'flex', flexDirection: 'column',
     }}>
@@ -23,13 +23,13 @@ export default function VehicleCard({ row, idx, onView, onEdit, onDelete, onHist
             <div style={{
               width: 40, height: 40, borderRadius: 10, flexShrink: 0, fontSize: 20,
               display: 'flex', alignItems: 'center', justifyContent: 'center',
-              background: isCarro ? '#DBEAFE' : '#FEF3C7',
+              background: isCarro ? 'var(--info-bg)' : 'var(--warning-bg)',
             }}>{isCarro ? '🚗' : '🏍'}</div>
             <div style={{ minWidth: 0 }}>
               <div style={{ fontWeight: 700, fontSize: 13.5, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                 {row.nombre_empleado}
               </div>
-              <div style={{ fontSize: 12, fontFamily: 'monospace', fontWeight: 700, color: isCarro ? '#1E40AF' : '#92400E', letterSpacing: '0.06em', marginTop: 1 }}>
+              <div style={{ fontSize: 12, fontFamily: 'monospace', fontWeight: 700, color: isCarro ? 'var(--info-text)' : 'var(--warning-text)', letterSpacing: '0.06em', marginTop: 1 }}>
                 {row.placa || '—'}
               </div>
             </div>
@@ -50,10 +50,10 @@ export default function VehicleCard({ row, idx, onView, onEdit, onDelete, onHist
             </span>
           )}
           {isExento && (
-            <span style={{ fontSize: 11, fontWeight: 700, padding: '2px 8px', borderRadius: 999, background: '#DCFCE7', color: '#166534', border: '1px solid #86EFAC' }}>✓ Exento</span>
+            <span style={{ fontSize: 11, fontWeight: 700, padding: '2px 8px', borderRadius: 999, background: 'var(--success-bg)', color: 'var(--success-text)', border: '1px solid color-mix(in srgb, var(--success) 35%, transparent)' }}>✓ Exento</span>
           )}
           {row.retirado && (
-            <span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 5, fontSize: 11, fontWeight: 700, padding: '2px 8px', borderRadius: 999, background: '#FEE2E2', color: '#991B1B', border: '1px solid #FCA5A5', lineHeight: 1 }}><span style={{ fontSize: 8 }}>●</span>Retirado</span>
+            <span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 5, fontSize: 11, fontWeight: 700, padding: '2px 8px', borderRadius: 999, background: 'var(--danger-bg)', color: 'var(--danger-text)', border: '1px solid color-mix(in srgb, var(--danger) 35%, transparent)', lineHeight: 1 }}><span style={{ fontSize: 8 }}>●</span>Retirado</span>
           )}
         </div>
 
@@ -75,7 +75,7 @@ export default function VehicleCard({ row, idx, onView, onEdit, onDelete, onHist
       {/* Footer reporte */}
       <div style={{
         padding: '8px 16px', borderTop: '1px solid var(--border)',
-        background: hasReporte ? '#EEF2FF' : 'var(--bg)',
+        background: hasReporte ? 'var(--info-bg)' : 'var(--bg)',
         display: 'flex', alignItems: 'center', gap: 6, fontSize: 11,
       }}>
         {hasReporte ? (
@@ -86,7 +86,7 @@ export default function VehicleCard({ row, idx, onView, onEdit, onDelete, onHist
         ) : (
           <>
             <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#F59E0B', flexShrink: 0, display: 'inline-block' }} />
-            <span style={{ color: '#92400E', fontWeight: 500 }}>Reporte pendiente</span>
+            <span style={{ color: 'var(--warning-text)', fontWeight: 500 }}>Reporte pendiente</span>
           </>
         )}
       </div>

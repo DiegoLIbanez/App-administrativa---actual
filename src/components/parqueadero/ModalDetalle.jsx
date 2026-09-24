@@ -16,7 +16,7 @@ export default function ModalDetalle({ row, onClose, onEdit }) {
       <div className="modal" style={{ maxWidth: 560 }}>
         <div className="modal-header">
           <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-            <div style={{ width: 44, height: 44, borderRadius: '50%', background: row.tipo === 'CARRO' ? '#DBEAFE' : '#FEF3C7', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, fontSize: 20 }}>
+            <div style={{ width: 44, height: 44, borderRadius: '50%', background: row.tipo === 'CARRO' ? 'var(--info-bg)' : 'var(--warning-bg)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, fontSize: 20 }}>
               {row.tipo === 'CARRO' ? '🚗' : '🏍'}
             </div>
             <div>
@@ -40,8 +40,8 @@ export default function ModalDetalle({ row, onClose, onEdit }) {
             <Field label="Fecha de ingreso" value={row.fecha_ingreso} />
             <Field label="Fecha de retiro" value={row.fecha_retiro} />
             <Field label="Estado" value={row.retirado
-              ? <span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 5, padding: '2px 10px', borderRadius: 999, fontSize: 12, fontWeight: 700, background: '#FEE2E2', color: '#991B1B', border: '1px solid #FCA5A5', lineHeight: 1 }}><span style={{ fontSize: 8 }}>●</span>Retirado</span>
-              : <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, padding: '2px 10px', borderRadius: 999, fontSize: 12, fontWeight: 700, background: '#DCFCE7', color: '#166534', border: '1px solid #86EFAC' }}>✓ Activo</span>} />
+              ? <span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 5, padding: '2px 10px', borderRadius: 999, fontSize: 12, fontWeight: 700, background: 'var(--danger-bg)', color: 'var(--danger-text)', border: '1px solid color-mix(in srgb, var(--danger) 35%, transparent)', lineHeight: 1 }}><span style={{ fontSize: 8 }}>●</span>Retirado</span>
+              : <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, padding: '2px 10px', borderRadius: 999, fontSize: 12, fontWeight: 700, background: 'var(--success-bg)', color: 'var(--success-text)', border: '1px solid color-mix(in srgb, var(--success) 35%, transparent)' }}>✓ Activo</span>} />
             <div style={{ gridColumn: '1/-1' }}>
               <Field label="Observación" value={<ObsBadge obs={row.observacion} />} />
             </div>
@@ -50,12 +50,12 @@ export default function ModalDetalle({ row, onClose, onEdit }) {
             </div>
           </div>
           {row.fecha_envio_reporte && (
-            <div style={{ background: '#EEF2FF', border: '1px solid #C7D2FE', borderRadius: 8, padding: '10px 14px', fontSize: 13, color: '#3730A3', display: 'flex', alignItems: 'center', gap: 8 }}>
+            <div style={{ background: 'var(--info-bg)', border: '1px solid color-mix(in srgb, var(--info) 35%, transparent)', borderRadius: 8, padding: '10px 14px', fontSize: 13, color: '#3730A3', display: 'flex', alignItems: 'center', gap: 8 }}>
               📤 Reporte enviado el {row.fecha_envio_reporte.split('T')[0]}
             </div>
           )}
           {row.observacion === 'EXENTOS DE PAGO' && (
-            <div style={{ background: '#DCFCE7', border: '1px solid #86EFAC', borderRadius: 8, padding: '10px 14px', fontSize: 13, color: '#166534', display: 'flex', alignItems: 'center', gap: 8, marginTop: 8 }}>
+            <div style={{ background: 'var(--success-bg)', border: '1px solid color-mix(in srgb, var(--success) 35%, transparent)', borderRadius: 8, padding: '10px 14px', fontSize: 13, color: 'var(--success-text)', display: 'flex', alignItems: 'center', gap: 8, marginTop: 8 }}>
               ✓ Este colaborador está exento de pago de parqueadero.
             </div>
           )}

@@ -52,7 +52,7 @@ export default function ColaboradorCard({ col, idx, maxDias, onSelect }) {
             </div>
           </div>
           {col.episodiosInc >= 2 && (
-            <span style={{ flexShrink: 0, background: '#FEE2E2', color: '#991B1B', fontSize: 10, fontWeight: 700, padding: '2px 8px', borderRadius: 20, display: 'flex', alignItems: 'center', gap: 3 }}>
+            <span style={{ flexShrink: 0, background: 'var(--danger-bg)', color: 'var(--danger-text)', fontSize: 10, fontWeight: 700, padding: '2px 8px', borderRadius: 20, display: 'flex', alignItems: 'center', gap: 3 }}>
               <AlertTriangle size={9} /> Reinc.
             </span>
           )}
@@ -62,22 +62,22 @@ export default function ColaboradorCard({ col, idx, maxDias, onSelect }) {
         {(col.tieneVehiculo || col.procesosDisciplinarios > 0 || col.productividad != null) && (
           <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 12, marginTop: -4 }}>
             {col.tieneVehiculo && (
-              <span title="Tiene vehículo" style={{ display: 'flex', alignItems: 'center', gap: 4, background: '#EFF6FF', color: '#1D4ED8', fontSize: 10.5, fontWeight: 600, padding: '2px 8px', borderRadius: 20 }}>
+              <span title="Tiene vehículo" style={{ display: 'flex', alignItems: 'center', gap: 4, background: 'var(--info-bg)', color: 'var(--info-text)', fontSize: 10.5, fontWeight: 600, padding: '2px 8px', borderRadius: 20 }}>
                 🏍️ Vehículo
               </span>
             )}
             {col.procesosDisciplinarios > 0 && (
               <span title={`${col.procesosDisciplinarios} proceso(s) disciplinario(s)`} style={{
                 display: 'flex', alignItems: 'center', gap: 4, fontSize: 10.5, fontWeight: 700, padding: '2px 8px', borderRadius: 20,
-                background: col.procesosDisciplinarios >= UMBRAL_ALERTA_PD ? '#FEE2E2' : '#FEF3C7',
-                color: col.procesosDisciplinarios >= UMBRAL_ALERTA_PD ? '#991B1B' : '#92400E',
+                background: col.procesosDisciplinarios >= UMBRAL_ALERTA_PD ? 'var(--danger-bg)' : 'var(--warning-bg)',
+                color: col.procesosDisciplinarios >= UMBRAL_ALERTA_PD ? 'var(--danger-text)' : 'var(--warning-text)',
               }}>
                 📋 {col.procesosDisciplinarios} proceso{col.procesosDisciplinarios !== 1 ? 's' : ''} disc.
               </span>
             )}
             {col.productividad != null && (
               <span title={`${col.productividadCfg?.label || 'Productividad'} · ${col.productividadPeriodo}`} style={{
-                display: 'flex', alignItems: 'center', gap: 4, background: '#DCFCE7', color: '#166534',
+                display: 'flex', alignItems: 'center', gap: 4, background: 'var(--success-bg)', color: 'var(--success-text)',
                 fontSize: 10.5, fontWeight: 700, padding: '2px 8px', borderRadius: 20,
               }}>
                 📈 {formatProductividad(col.productividad, col.productividadCfg)}
@@ -95,9 +95,9 @@ export default function ColaboradorCard({ col, idx, maxDias, onSelect }) {
             {/* Métricas */}
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 6, marginBottom: 10 }}>
               {[
-                { val: col.episodiosInc, label: 'incap.', color: '#DC2626', bg: '#FEF2F2' },
-                { val: col.diasInc.toFixed(0), label: 'días inc.', color: '#D97706', bg: '#FFFBEB' },
-                { val: col.novedades.length, label: 'novedades', color: '#2563EB', bg: '#EFF6FF' },
+                { val: col.episodiosInc, label: 'incap.', color: '#DC2626', bg: 'var(--danger-bg)' },
+                { val: col.diasInc.toFixed(0), label: 'días inc.', color: '#D97706', bg: 'var(--warning-bg)' },
+                { val: col.novedades.length, label: 'novedades', color: '#2563EB', bg: 'var(--info-bg)' },
               ].map(m => (
                 <div key={m.label} style={{ textAlign: 'center', padding: '7px 4px', background: m.bg, borderRadius: 8 }}>
                   <div style={{ fontSize: 17, fontWeight: 800, color: m.color, lineHeight: 1 }}>{m.val}</div>
@@ -138,9 +138,8 @@ export default function ColaboradorCard({ col, idx, maxDias, onSelect }) {
                 {topConceptos.map(([c, d]) => {
                   const color = CONCEPTO_COLORS[c] || '#374151'
                   return (
-                    <span key={c} style={{
-                      fontSize: 10, fontWeight: 600, padding: '2px 7px', borderRadius: 999,
-                      background: color + '18', color, border: `1px solid ${color}35`,
+                    <span key={c} className="tag-c tag-c--line" style={{
+                      '--tag': color, fontSize: 10, fontWeight: 600, padding: '2px 7px', borderRadius: 999,
                     }}>
                       {c} · {d.episodios}
                     </span>

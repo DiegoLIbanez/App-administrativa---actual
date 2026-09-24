@@ -11,13 +11,13 @@ export const PILL_BASE = {
   whiteSpace: 'nowrap', letterSpacing: '0.02em'
 }
 export const PILL_STYLES = {
-  ok: { ...PILL_BASE, background: '#DCFCE7', color: '#166534', border: '1px solid #86EFAC' },
-  si: { ...PILL_BASE, background: '#DBEAFE', color: '#1E40AF', border: '1px solid #93C5FD' },
-  no: { ...PILL_BASE, background: '#FEE2E2', color: '#991B1B', border: '1px solid #FCA5A5' },
+  ok: { ...PILL_BASE, background: 'var(--success-bg)', color: 'var(--success-text)', border: '1px solid color-mix(in srgb, var(--success) 35%, transparent)' },
+  si: { ...PILL_BASE, background: 'var(--info-bg)', color: 'var(--info-text)', border: '1px solid color-mix(in srgb, var(--info) 35%, transparent)' },
+  no: { ...PILL_BASE, background: 'var(--danger-bg)', color: 'var(--danger-text)', border: '1px solid color-mix(in srgb, var(--danger) 35%, transparent)' },
   na: { ...PILL_BASE, background: 'var(--bg)', color: '#374151', border: '1px solid #D1D5DB' },
-  validar: { ...PILL_BASE, background: '#FEF3C7', color: '#92400E', border: '1px solid #FCD34D' },
+  validar: { ...PILL_BASE, background: 'var(--warning-bg)', color: 'var(--warning-text)', border: '1px solid color-mix(in srgb, var(--warning) 40%, transparent)' },
   empty: { ...PILL_BASE, background: 'transparent', color: '#6B7280', border: '1px solid #E5E7EB' },
-  other: { ...PILL_BASE, background: '#EDE9FE', color: '#5B21B6', border: '1px solid #C4B5FD' },
+  other: { ...PILL_BASE, background: 'var(--purple-bg)', color: 'var(--purple-text)', border: '1px solid color-mix(in srgb, var(--purple) 35%, transparent)' },
 }
 
 export function statusPill(val) {

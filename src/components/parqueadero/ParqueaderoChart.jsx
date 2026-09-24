@@ -33,8 +33,8 @@ export default function ParqueaderoChart({
               </div>
               <div style={{ width: 22, fontSize: 12, fontWeight: 700, textAlign: 'right', color: isActive ? 'var(--primary)' : 'var(--text)' }}>{e.total}</div>
               <div style={{ display: 'flex', gap: 4, minWidth: 60 }}>
-                {e.carros > 0 && <span style={{ fontSize: 10, padding: '1px 5px', borderRadius: 999, background: '#DBEAFE', color: '#1E40AF' }}>{e.carros}🚗</span>}
-                {e.motos > 0 && <span style={{ fontSize: 10, padding: '1px 5px', borderRadius: 999, background: '#FEF3C7', color: '#92400E' }}>{e.motos}🏍</span>}
+                {e.carros > 0 && <span style={{ fontSize: 10, padding: '1px 5px', borderRadius: 999, background: 'var(--info-bg)', color: 'var(--info-text)' }}>{e.carros}🚗</span>}
+                {e.motos > 0 && <span style={{ fontSize: 10, padding: '1px 5px', borderRadius: 999, background: 'var(--warning-bg)', color: 'var(--warning-text)' }}>{e.motos}🏍</span>}
               </div>
             </div>
           )

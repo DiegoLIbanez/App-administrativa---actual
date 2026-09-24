@@ -49,14 +49,20 @@
   border: 1.5px solid var(--border); background: var(--bg); cursor: pointer;
   font-size: 12px; font-weight: 600; color: var(--text); transition: all .15s; text-align: left;
 }
-.emp-dep-btn:hover { border-color: var(--secondary); background: var(--secondary-light); color: var(--secondary-dark); }
-.emp-dep-btn.active { font-weight: 800; }
+.emp-dep-btn:hover { border-color: var(--secondary); background: rgba(var(--secondary-rgb), 0.12); color: var(--secondary-dark); }
+:root[data-theme="dark"] .emp-dep-btn:hover { color: var(--secondary); }
+.emp-dep-btn.active { border-color: var(--secondary); background: rgba(var(--secondary-rgb), 0.16); color: var(--secondary-dark); font-weight: 800; }
+:root[data-theme="dark"] .emp-dep-btn.active { color: var(--secondary); }
+
 .emp-status-btn {
   flex: 1; padding: 13px 10px; border-radius: 12px; border: 2px solid var(--border);
   background: var(--bg); cursor: pointer; display: flex; flex-direction: column;
   align-items: center; gap: 6px; transition: all .18s; font-size: 12px; font-weight: 700; color: var(--text);
 }
-.emp-status-btn:hover { border-color: var(--secondary); background: var(--secondary-light); color: var(--secondary-dark); }
+.emp-status-btn:hover { border-color: var(--secondary); background: rgba(var(--secondary-rgb), 0.12); color: var(--secondary-dark); }
+:root[data-theme="dark"] .emp-status-btn:hover { color: var(--secondary); }
+.emp-status-btn.active { border-color: var(--secondary); background: rgba(var(--secondary-rgb), 0.16); color: var(--secondary-dark); }
+:root[data-theme="dark"] .emp-status-btn.active { color: var(--secondary); }
 .emp-section { margin-bottom: 22px; }
 .emp-section-hdr {
   display: flex; align-items: center; gap: 8px; margin-bottom: 12px;

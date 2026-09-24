@@ -31,7 +31,7 @@ export default function ViewDetailModal({ viewRow, onClose, onEdit }) {
           <>
             <div className="modal-header">
               <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                <span className="badge" style={{ background: color + '20', color, fontSize: 13, padding: '4px 12px' }}>{viewRow.concepto}</span>
+                <span className="badge tag-c" style={{ '--tag': color, fontSize: 13, padding: '4px 12px' }}>{viewRow.concepto}</span>
                 <h2 style={{ margin: 0, fontSize: 16 }}>{viewRow.nombre_empleado}</h2>
               </div>
               <button className="modal-close" onClick={onClose}><X size={18} /></button>

@@ -6,6 +6,7 @@
 import { Eye } from 'lucide-react'
 import { CONCEPTO_MAP, ALERT, UMBRAL_ALERTA } from '../../utils/procesosDisciplinariosConstants'
 import './procesos-disciplinarios.css'
+import PersonCell from '../ui/PersonCell'
 
 export default function PdGruposTable({ pagedGrupos, onSelectEmpleado }) {
   return (
@@ -28,11 +29,10 @@ export default function PdGruposTable({ pagedGrupos, onSelectEmpleado }) {
             const count = grupo.procesos.length
             const enAlerta = count >= UMBRAL_ALERTA
             return (
-              <tr key={grupo.key} className="pd-anim-row" style={{ animationDelay: `${Math.min(i, 20) * 20}ms`, background: enAlerta ? '#FFF7F7' : undefined }}>
-                <td style={{ fontWeight: 600, maxWidth: 220 }}>
-                  <span className="pd-chip" onClick={() => onSelectEmpleado(grupo.key)}
-                    style={{ display: 'inline-flex', alignItems: 'center', gap: 5, color: 'var(--primary)' }}>
-                    {grupo.nombre}
+              <tr key={grupo.key} className="pd-anim-row" style={{ animationDelay: `${Math.min(i, 20) * 20}ms`, '--row-bg': enAlerta ? 'color-mix(in srgb, var(--danger) 7%, transparent)' : undefined }}>
+                <td style={{ maxWidth: 260 }}>
+                  <div className="pd-chip" onClick={() => onSelectEmpleado(grupo.key)} style={{ cursor: 'pointer' }}>
+                    <PersonCell nombre={grupo.nombre} color={enAlerta ? '#DC2626' : undefined}>
                     {enAlerta && (
                       <span title={`${count} procesos disciplinarios registrados`}
                         style={{
@@ -42,7 +42,8 @@ export default function PdGruposTable({ pagedGrupos, onSelectEmpleado }) {
                         }}
                         className="pd-warn-dot">!</span>
                     )}
-                  </span>
+                    </PersonCell>
+                  </div>
                 </td>
                 <td style={{ textAlign: 'center' }}>
                   <span style={{

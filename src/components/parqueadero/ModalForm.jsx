@@ -1,5 +1,6 @@
 import { X } from 'lucide-react'
 import { MESES } from '../../utils/parqueaderoConstants'
+import SearchableSelect from '../ui/SearchableSelect'
 
 export default function ModalForm({
   modal, form, setForm, f, save, saving, dupWarn,
@@ -52,7 +53,7 @@ export default function ModalForm({
                   </span>
                 )}
                 {form.observacion === 'EXENTOS DE PAGO' && (
-                  <span style={{ background: 'rgba(134,239,172,0.3)', color: '#DCFCE7', padding: '2px 8px', borderRadius: 999, fontSize: 11, fontWeight: 700 }}>✓ Exento</span>
+                  <span style={{ background: 'rgba(134,239,172,0.3)', color: 'var(--success-bg)', padding: '2px 8px', borderRadius: 999, fontSize: 11, fontWeight: 700 }}>✓ Exento</span>
                 )}
               </div>
             </div>
@@ -90,7 +91,7 @@ export default function ModalForm({
 
           {/* Alerta duplicado */}
           {dupWarn && (
-            <div style={{ background: '#FFFBEB', border: '1px solid #FCD34D', borderRadius: 10, padding: '11px 14px', fontSize: 13, color: '#92400E', display: 'flex', alignItems: 'center', gap: 10, animation: 'fadeInUp .2s ease' }}>
+            <div style={{ background: 'var(--warning-bg)', border: '1px solid color-mix(in srgb, var(--warning) 40%, transparent)', borderRadius: 10, padding: '11px 14px', fontSize: 13, color: 'var(--warning-text)', display: 'flex', alignItems: 'center', gap: 10, animation: 'fadeInUp .2s ease' }}>
               <span style={{ fontSize: 18 }}>⚠️</span>
               <span>Este empleado ya tiene un registro en <strong>{form.mes} {form.anio}</strong>.</span>
             </div>
@@ -99,23 +100,18 @@ export default function ModalForm({
           {/* ── Sección 1: Empleado ── */}
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
-              <div style={{ width: 24, height: 24, borderRadius: 6, background: '#EFF6FF', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 13 }}>👤</div>
+              <div style={{ width: 24, height: 24, borderRadius: 6, background: 'var(--info-bg)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 13 }}>👤</div>
               <span style={{ fontSize: 11, fontWeight: 800, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#374151' }}>Datos del empleado</span>
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
               <div>
                 <label style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-muted)', marginBottom: 5, display: 'block' }}>Nombre completo *</label>
-                <div style={{ position: 'relative' }}>
-                  <span style={{ position: 'absolute', left: 11, top: '50%', transform: 'translateY(-50%)', fontSize: 15, pointerEvents: 'none' }}>🔍</span>
-                  <input className="form-control" list="emp-park-list"
-                    value={form.nombre_empleado} onChange={f('nombre_empleado')}
-                    placeholder="Escribe para buscar empleado..." autoComplete="off"
-                    style={{ paddingLeft: 34, fontSize: 14, fontWeight: 500 }} />
-                </div>
-                <datalist id="emp-park-list">
-                  {empleados.activos.map(e => <option key={e} value={e} />)}
-                  {empleados.inactivos.map(e => <option key={e} value={e} />)}
-                </datalist>
+                <SearchableSelect
+                  value={form.nombre_empleado}
+                  onChange={val => setForm(p => ({ ...p, nombre_empleado: val }))}
+                  activos={empleados.activos} inactivos={empleados.inactivos}
+                  placeholder="— Seleccionar empleado —"
+                />
               </div>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
                 <div>
@@ -163,10 +159,10 @@ export default function ModalForm({
                         border: sel ? `2px solid ${opt.color}` : '2px solid var(--border)',
                         background: sel ? opt.bg : 'var(--surface)',
                         transition: 'all .2s ease',
-                        boxShadow: sel ? `0 0 0 3px ${opt.color}22,0 4px 12px ${opt.color}18` : '0 1px 3px rgba(0,0,0,.06)',
+                        boxShadow: sel ? `0 0 0 3px color-mix(in srgb, ${opt.color} 14%, transparent), 0 4px 12px color-mix(in srgb, ${opt.color} 10%, transparent)` : '0 1px 3px rgba(0,0,0,.06)',
                         transform: sel ? 'translateY(-1px)' : 'none',
                       }}
-                      onMouseEnter={e => { if (!sel) { e.currentTarget.style.borderColor = opt.border; e.currentTarget.style.background = opt.bg + '66'; e.currentTarget.style.transform = 'translateY(-1px)' } }}
+                      onMouseEnter={e => { if (!sel) { e.currentTarget.style.borderColor = opt.border; e.currentTarget.style.background = opt.bg; e.currentTarget.style.transform = 'translateY(-1px)' } }}
                       onMouseLeave={e => { if (!sel) { e.currentTarget.style.borderColor = 'var(--border)'; e.currentTarget.style.background = 'var(--surface)'; e.currentTarget.style.transform = 'none' } }}>
                       <div style={{ fontSize: 28, marginBottom: 6 }}>{opt.icon}</div>
                       <div style={{ fontSize: 14, fontWeight: 700, color: sel ? opt.color : 'var(--text)' }}>{opt.label}</div>
@@ -215,7 +211,7 @@ export default function ModalForm({
           {/* ── Sección 3: Período ── */}
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
-              <div style={{ width: 24, height: 24, borderRadius: 6, background: '#F0FDF4', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 13 }}>📅</div>
+              <div style={{ width: 24, height: 24, borderRadius: 6, background: 'var(--success-bg)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 13 }}>📅</div>
               <span style={{ fontSize: 11, fontWeight: 800, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#374151' }}>Período</span>
             </div>
 
@@ -253,9 +249,9 @@ export default function ModalForm({
                     <button key={m} type="button" onClick={() => setForm(p => ({ ...p, mes: m }))}
                       style={{
                         padding: '7px 4px', borderRadius: 8, fontSize: 12, fontWeight: sel ? 700 : 500, cursor: 'pointer',
-                        border: sel ? '2px solid #2563EB' : esActual ? '2px solid #93C5FD' : '1.5px solid var(--border)',
-                        background: sel ? '#2563EB' : esActual ? '#EFF6FF' : 'var(--surface)',
-                        color: sel ? '#fff' : esActual ? '#1E40AF' : 'var(--text)',
+                        border: sel ? '2px solid #2563EB' : esActual ? '2px solid color-mix(in srgb, var(--info) 35%, transparent)' : '1.5px solid var(--border)',
+                        background: sel ? '#2563EB' : esActual ? 'var(--info-bg)' : 'var(--surface)',
+                        color: sel ? '#fff' : esActual ? 'var(--info-text)' : 'var(--text)',
                         transition: 'all .15s',
                         boxShadow: sel ? '0 2px 8px #2563EB44' : 'none',
                         position: 'relative',
@@ -296,7 +292,7 @@ export default function ModalForm({
               <input type="checkbox" checked={!!form.retirado}
                 onChange={e => setForm(p => ({ ...p, retirado: e.target.checked }))}
                 style={{ width: 16, height: 16, accentColor: '#DC2626', cursor: 'pointer' }} />
-              <span style={{ fontSize: 13, fontWeight: 600, color: form.retirado ? '#991B1B' : 'var(--text)' }}>
+              <span style={{ fontSize: 13, fontWeight: 600, color: form.retirado ? 'var(--danger-text)' : 'var(--text)' }}>
                 Esta persona ya se retiró
               </span>
             </label>

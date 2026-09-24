@@ -15,14 +15,14 @@ export const DEP_ICONS = {
 }
 
 export const DEP_COLORS = {
-  'COBRANZA': ['#FEF3C7', '#92400E', '#FCD34D'],
-  'CIERRE': ['#FEE2E2', '#991B1B', '#FCA5A5'],
-  'VENTAS': ['#DCFCE7', '#166534', '#86EFAC'],
-  'UNDERWRITING': ['#EDE9FE', '#5B21B6', '#C4B5FD'],
-  'CONTABILIDAD': ['#DBEAFE', '#1E40AF', '#93C5FD'],
+  'COBRANZA': ['var(--warning-bg)', 'var(--warning-text)', 'color-mix(in srgb, var(--warning) 40%, transparent)'],
+  'CIERRE': ['var(--danger-bg)', 'var(--danger-text)', 'color-mix(in srgb, var(--danger) 35%, transparent)'],
+  'VENTAS': ['var(--success-bg)', 'var(--success-text)', 'color-mix(in srgb, var(--success) 35%, transparent)'],
+  'UNDERWRITING': ['var(--purple-bg)', 'var(--purple-text)', 'color-mix(in srgb, var(--purple) 35%, transparent)'],
+  'CONTABILIDAD': ['var(--info-bg)', 'var(--info-text)', 'color-mix(in srgb, var(--info) 35%, transparent)'],
   'RRHH': ['#FCE7F3', '#9D174D', '#F9A8D4'],
-  'GERENCIA': ['#F0FDF4', '#14532D', '#6EE7B7'],
-  'SOPORTE TI': ['#EFF6FF', '#1E3A8A', '#BFDBFE'],
+  'GERENCIA': ['var(--success-bg)', 'var(--success-text)', 'color-mix(in srgb, var(--success) 35%, transparent)'],
+  'SOPORTE TI': ['var(--info-bg)', 'var(--info-text)', 'color-mix(in srgb, var(--info) 30%, transparent)'],
 }
 
 export const CONCEPTOS_CON_FECHA = [

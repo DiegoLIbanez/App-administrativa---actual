@@ -8,6 +8,8 @@
 export const PAGE_SIZE = 12
 export const UMBRAL_ALERTA_PD = 3 // mismo umbral que usa la pestaña de Procesos Disciplinarios
 
+import { DEPTOS, METRICA, METRICA_RESUELTOS } from './productividadConstants'
+
 export const CONCEPTOS_CON_FECHA = ['Incapacidad','Vacaciones','LNR','LR','Maternidad','Paternidad','Calamidad/Luto','Día Familia','Hospitalización','Embargo','Otro']
 
 // Para la tasa de ausentismo: todos los conceptos con fecha EXCEPTO Vacaciones
@@ -25,20 +27,28 @@ export const PRODUCTIVIDAD_MESES = ['Enero','Febrero','Marzo','Abril','Mayo','Ju
 // departamento de Productividad (mismos valores que usa Productividad.jsx en
 // DEPTOS / CIERRE_CFG.departamento)
 export const PRODUCTIVIDAD_DEPTS = {
-  VENTAS:        { departamento: 'Ventas',  label: 'Ventas' },
-  UNDERWRITING:  { departamento: 'UW - BS', label: 'Producción' },
+  VENTAS:        { departamento: 'Ventas',  label: 'Clientes resueltos' },
+  UNDERWRITING:  { departamento: 'UW - BS', label: 'Clientes resueltos' },
   CIERRE:        { departamento: 'Cierre',  label: 'Total cerrado', money: true },
 }
 export const normalizeNombreProd = (s) => (s || '').trim().toLowerCase()
 
 // Arma { [anio]: { [departamento]: { [nombreNormalizado]: { [mesNombre]: valor } } } }
 // a partir de las filas crudas de "productividad" (Ventas/UW-BS) y "cierre_meses" (Cierre).
-export function construirProductividad(prodRows, cierreRows) {
+// Ventas y UW-BS guardan "Clientes Asignados" y "Clientes Resueltos": para
+// Colaboradores se usa "Clientes Resueltos". Los demás departamentos siguen
+// con la métrica de un solo valor "Producción". Con usaClientes=false (Global
+// Link) todos los departamentos usan "Producción".
+const DEPTS_CLIENTES = Object.values(DEPTOS).filter(d => d.usaClientes).map(d => d.departamento)
+
+export function construirProductividad(prodRows, cierreRows, { usaClientes = true } = {}) {
   const data = {}
   ;(prodRows || []).forEach(r => {
     const anio = r.anio
     const dep = r.departamento
     if (!anio || !dep) return
+    const metricaEsperada = usaClientes && DEPTS_CLIENTES.includes(dep) ? METRICA_RESUELTOS : METRICA
+    if (r.metrica && r.metrica !== metricaEsperada) return
     if (!data[anio]) data[anio] = {}
     if (!data[anio][dep]) data[anio][dep] = {}
     const key = normalizeNombreProd(r.nombre_empleado)
@@ -55,7 +65,7 @@ export function construirProductividad(prodRows, cierreRows) {
     const key = normalizeNombreProd(r.nombre_empleado)
     if (!key) return
     if (!data[anio][dep][key]) data[anio][dep][key] = {}
-    data[anio][dep][key][r.mes] = Number(r.total_dollars) || 0
+    data[anio][dep][key][r.mes] = Number(r.plata_prestada ?? r.total_plata ?? r.total_dollars ?? r.renewal_dollars) || 0
   })
   return data
 }

@@ -18,7 +18,7 @@ export default function ModalDuplicado({ modalDuplicado, filterMes, filterAnio, 
             fontSize: 26, flexShrink: 0,
           }}>🚫</div>
           <div style={{ flex: 1 }}>
-            <div style={{ color: '#FCA5A5', fontSize: 11, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: 3 }}>
+            <div style={{ color: 'color-mix(in srgb, var(--danger) 35%, transparent)', fontSize: 11, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: 3 }}>
               Copia bloqueada
             </div>
             <h2 style={{ color: '#fff', margin: 0, fontSize: 17, fontWeight: 800 }}>
@@ -38,7 +38,7 @@ export default function ModalDuplicado({ modalDuplicado, filterMes, filterAnio, 
         <div className="modal-body" style={{ padding: '20px 24px' }}>
           {/* Mensaje principal */}
           <div style={{
-            background: '#FEF2F2', border: '1px solid #FECACA', borderRadius: 10,
+            background: 'var(--danger-bg)', border: '1px solid #FECACA', borderRadius: 10,
             padding: '14px 16px', marginBottom: 16,
           }}>
             <p style={{ margin: 0, fontSize: 13.5, color: '#7F1D1D', lineHeight: 1.6 }}>
@@ -58,7 +58,7 @@ export default function ModalDuplicado({ modalDuplicado, filterMes, filterAnio, 
                 <span key={p} style={{
                   padding: '4px 10px', borderRadius: 999, fontSize: 12, fontWeight: 700,
                   fontFamily: 'monospace', letterSpacing: '0.05em',
-                  background: '#FEE2E2', color: '#991B1B', border: '1px solid #FECACA',
+                  background: 'var(--danger-bg)', color: 'var(--danger-text)', border: '1px solid #FECACA',
                 }}>{p}</span>
               ))}
             </div>

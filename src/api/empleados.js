@@ -6,6 +6,7 @@
 // Soporta filtrado y asignación por empresa ('ameriglobal' / 'global_link').
 // =============================================================
 import { supabase } from '../supabaseClient'
+import { resolverIdsRelacionales } from './idResolvers'
 
 const TABLA = 'empleados'
 
@@ -60,15 +61,48 @@ export function listarEmpleadosActivosPorDependencia(dependencia, empresa) {
   return query
 }
 
-export function crearEmpleado(payload, empresa = 'ameriglobal') {
+export async function crearEmpleado(payload, empresa = 'ameriglobal') {
+  const empresaFinal = payload.empresa || empresa
+  // Además de guardar 'empresa' y 'dependencia' como texto (igual que antes),
+  // buscamos sus ids relacionales para dejar el registro ya conectado.
+  const { empresa_id, departamento_id } = await resolverIdsRelacionales({
+    empresa: empresaFinal,
+    dependencia: payload.dependencia,
+  })
   return supabase.from(TABLA).insert([{
     ...payload,
-    empresa: payload.empresa || empresa,
+    empresa: empresaFinal,
+    empresa_id,
+    departamento_id,
   }])
 }
 
-export function actualizarEmpleado(id, payload) {
-  return supabase.from(TABLA).update(payload).eq('id', id)
+export async function actualizarEmpleado(id, payload) {
+  const dataToUpdate = { ...payload }
+
+  // Solo recalculamos los ids si el update toca 'empresa' o 'dependencia'.
+  // Si solo cambia una de las dos, igual hay que re-resolver el departamento
+  // completo: la misma dependencia puede existir en más de una empresa.
+  if (payload.empresa || payload.dependencia) {
+    let { empresa: empresaParaResolver, dependencia: dependenciaParaResolver } = payload
+    if (!empresaParaResolver || !dependenciaParaResolver) {
+      const { data: actual } = await supabase
+        .from(TABLA)
+        .select('empresa, dependencia')
+        .eq('id', id)
+        .maybeSingle()
+      empresaParaResolver = empresaParaResolver || actual?.empresa
+      dependenciaParaResolver = dependenciaParaResolver || actual?.dependencia
+    }
+    const { empresa_id, departamento_id } = await resolverIdsRelacionales({
+      empresa: empresaParaResolver,
+      dependencia: dependenciaParaResolver,
+    })
+    dataToUpdate.empresa_id = empresa_id
+    dataToUpdate.departamento_id = departamento_id
+  }
+
+  return supabase.from(TABLA).update(dataToUpdate).eq('id', id)
 }
 
 export function eliminarEmpleado(id) {

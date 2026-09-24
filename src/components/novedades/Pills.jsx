@@ -42,9 +42,9 @@ export function IncompleteIndicator({ row }) {
       title={campos.join('\n')}
       style={{
         display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
-        width: 16, height: 16, borderRadius: '50%', background: '#FEF3C7',
-        color: '#92400E', fontSize: 10, fontWeight: 800, cursor: 'default',
-        border: '1px solid #FCD34D', marginLeft: 4, flexShrink: 0,
+        width: 16, height: 16, borderRadius: '50%', background: 'var(--warning-bg)',
+        color: 'var(--warning-text)', fontSize: 10, fontWeight: 800, cursor: 'default',
+        border: '1px solid color-mix(in srgb, var(--warning) 40%, transparent)', marginLeft: 4, flexShrink: 0,
       }}
     >!</span>
   )

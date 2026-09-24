@@ -92,35 +92,47 @@ body { font-family: var(--font); background: var(--bg); color: var(--text); font
 :root[data-theme="dark"] .toggle-pill--off { background: rgba(148,163,184,.14); color: #CBD5E1; border-color: rgba(148,163,184,.3); }
 
 /* ===== SHARED COMPONENTS ===== */
-.page-header { margin-bottom: 24px; }
-.page-header h1 { font-size: 24px; font-weight: 800; color: var(--text); letter-spacing: -.3px; }
-.page-header p { color: var(--text-muted); font-size: 13px; margin-top: 4px; }
+@keyframes pageHeaderIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+.page-header { margin-bottom: 20px; animation: pageHeaderIn .25s ease both; }
+.page-header h1 { font-size: 20px; font-weight: 800; color: var(--text); letter-spacing: -.3px; display: flex; align-items: center; gap: 10px; }
+.page-header p { color: var(--text-muted); font-size: 12.5px; margin-top: 3px; }
+/* Ícono en degradé del título (igual al de Productividad) */
+.page-title-icon {
+  width: 36px; height: 36px; border-radius: 10px; flex-shrink: 0;
+  background: linear-gradient(135deg, var(--primary), var(--secondary));
+  display: flex; align-items: center; justify-content: center;
+  color: #fff; box-shadow: 0 4px 14px rgba(var(--secondary-rgb), .35);
+}
 
 .card {
   background: var(--surface); border-radius: var(--radius);
   border: 1px solid var(--border); box-shadow: var(--shadow);
-  padding: 20px;
+  padding: 18px 20px;
 }
 
-.stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 16px; margin-bottom: 24px; }
+.stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 14px; margin-bottom: 20px; }
 .stat-card {
   background: var(--surface); border-radius: var(--radius);
   border: 1px solid var(--border); padding: 18px 20px;
   box-shadow: var(--shadow); transition: box-shadow .18s, transform .18s;
-  position: relative;
+  position: relative; overflow: hidden;
+}
+.stat-card::after { /* acento en la esquina, como las tarjetas de Productividad */
+  content: ''; position: absolute; top: 0; right: 0; width: 70px; height: 70px;
+  border-radius: 0 0 0 70px; background: var(--primary); opacity: .08; pointer-events: none;
 }
 .stat-card:hover { box-shadow: var(--shadow-md); transform: translateY(-2px); }
 .stat-card-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; }
-.stat-card .stat-label { font-size: 12px; font-weight: 600; color: var(--text-muted); }
+.stat-card .stat-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--text-muted); }
 .stat-icon-chip {
   width: 34px; height: 34px; border-radius: 10px; flex-shrink: 0;
   display: flex; align-items: center; justify-content: center;
   background: color-mix(in srgb, var(--glow, var(--secondary)) 15%, transparent);
   color: var(--glow, var(--secondary));
 }
-.stat-card .stat-value { font-size: 26px; font-weight: 800; color: var(--text); margin-top: 10px; line-height: 1; }
-.stat-card .stat-sub { font-size: 12px; color: var(--text-muted); margin-top: 6px; }
-.stat-card.accent { border-left: 4px solid var(--primary); }
+.stat-card .stat-value { font-size: 23px; font-weight: 800; color: var(--text); margin-top: 8px; line-height: 1.1; letter-spacing: -.5px; }
+.stat-card .stat-sub { font-size: 11.5px; color: var(--text-muted); margin-top: 6px; }
+.stat-card.accent::after { background: var(--secondary); opacity: .18; }
 .stat-trend {
   display: inline-flex; align-items: center; gap: 3px;
   font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 999px;
@@ -153,8 +165,8 @@ tbody tr:last-child { border-bottom: none; }
 /* ===== BUTTONS ===== */
 .btn {
   display: inline-flex; align-items: center; gap: 6px;
-  padding: 9px 18px; border-radius: 999px; border: none;
-  font-size: 13px; font-weight: 700; cursor: pointer;
+  padding: 8px 16px; border-radius: 999px; border: none;
+  font-size: 12.5px; font-weight: 700; cursor: pointer;
   transition: all .15s; text-decoration: none; font-family: inherit;
   white-space: nowrap;
 }
@@ -163,6 +175,17 @@ tbody tr:last-child { border-bottom: none; }
 .btn-primary:active { transform: translateY(0); }
 .btn-secondary { background: var(--secondary); color: #fff; box-shadow: 0 4px 12px rgba(var(--secondary-rgb),.3); }
 .btn-secondary:hover { background: var(--secondary-dark); transform: translateY(-1px); }
+.btn-excel {
+  background: linear-gradient(135deg, #059669, #10B981);
+  color: #ffffff;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+  border: none;
+}
+.btn-excel:hover {
+  background: linear-gradient(135deg, #047857, #059669);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(16, 185, 129, 0.38);
+}
 .btn-ghost { background: var(--surface); color: var(--text); border: 1px solid var(--border); }
 .btn-ghost:hover { border-color: var(--secondary); color: var(--secondary-dark); background: var(--bg); }
 .btn-danger { background: var(--danger-bg); color: var(--danger-text); }
@@ -173,21 +196,21 @@ tbody tr:last-child { border-bottom: none; }
 /* Botón de icono cuadrado (acciones de fila en tablas: editar/eliminar) */
 .icon-btn {
   display: inline-flex; align-items: center; justify-content: center;
-  width: 28px; height: 28px; border-radius: 8px; padding: 0;
+  width: 26px; height: 26px; border-radius: 7px; padding: 0;
   border: 1px solid var(--border); background: var(--surface); color: var(--text-muted);
   cursor: pointer; transition: all .15s;
 }
-.icon-btn:hover { border-color: var(--secondary); color: var(--secondary-dark); }
+.icon-btn:hover { border-color: var(--secondary); color: var(--secondary-dark); background: var(--bg); }
 .icon-btn--danger { background: var(--danger-bg); color: var(--danger-text); border-color: transparent; }
 .icon-btn--danger:hover { background: rgba(220,38,38,.18); border-color: transparent; }
 
 /* ===== FORM ===== */
 .form-group { margin-bottom: 16px; }
-.form-group label { display: block; font-size: 12.5px; font-weight: 600; color: var(--text); margin-bottom: 5px; }
+.form-group label { display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; color: var(--text-muted); margin-bottom: 5px; }
 .form-control {
-  width: 100%; padding: 9px 12px; border: 1px solid var(--border);
-  border-radius: 9px; font-size: 13.5px; background: var(--surface);
-  color: var(--text); outline: none; transition: all .15s;
+  width: 100%; padding: 8px 12px; border: 1px solid var(--border);
+  border-radius: 10px; font-size: 13px; background: var(--bg);
+  color: var(--text); outline: none; transition: all .15s; font-family: inherit;
 }
 .form-control:focus { border-color: var(--secondary); box-shadow: 0 0 0 3px rgba(var(--secondary-rgb),.15); }
 select.form-control { cursor: pointer; }
@@ -217,21 +240,21 @@ textarea.form-control { resize: vertical; min-height: 80px; }
 .modal {
   background: var(--surface); border-radius: 16px;
   width: 100%; max-width: 600px; max-height: 90vh;
-  overflow-y: auto; box-shadow: 0 20px 60px rgba(0,0,0,.2);
+  overflow-y: auto; box-shadow: var(--shadow-md), 0 20px 60px rgba(0,0,0,.18);
   border: 1px solid var(--border);
 }
 .modal-header {
   display: flex; align-items: center; justify-content: space-between;
-  padding: 18px 22px; border-bottom: 1px solid var(--border);
+  padding: 18px 20px; border-bottom: 1px solid var(--border);
 }
-.modal-header h2 { font-size: 16px; font-weight: 700; }
+.modal-header h2 { font-size: 15px; font-weight: 800; color: var(--text); }
 .modal-close { background: none; border: none; cursor: pointer; color: var(--text-muted); padding: 4px; border-radius: 4px; }
 .modal-close:hover { color: var(--text); background: var(--bg); }
 .modal-close-btn { background: rgba(255,255,255,0.15); }
 .modal-close-btn:hover { background: rgba(255,255,255,0.28); }
-.modal-body { padding: 22px; }
+.modal-body { padding: 20px; }
 .modal-footer {
-  padding: 16px 22px; border-top: 1px solid var(--border);
+  padding: 16px 20px; border-top: 1px solid var(--border);
   display: flex; justify-content: flex-end; gap: 10px;
 }
 
@@ -314,3 +337,72 @@ textarea.form-control { resize: vertical; min-height: 80px; }
 .toggle-pill:disabled { cursor: not-allowed; opacity: .5; }
 .toggle-pill--on  { background: #DCFCE7; color: #166534; border-color: #86EFAC; }
 .toggle-pill--off { background: #F3F4F6; color: #4B5563; border-color: #D1D5DB; }
+
+
+/* =============================================================
+   TABLAS — mismo diseño que las de Productividad
+   (encabezado compacto en mayúsculas, filas con acento al pasar
+   el mouse). Se excluyen las tablas propias de Productividad para
+   no alterarlas.
+   ============================================================= */
+table:not(.pr-table):not(.ci-table):not(.pr-mes-table) { font-size: 12.5px; }
+table:not(.pr-table):not(.ci-table):not(.pr-mes-table) thead th {
+  padding: 9px 12px; font-weight: 700; font-size: 10.5px; letter-spacing: .05em;
+}
+table:not(.pr-table):not(.ci-table):not(.pr-mes-table) tbody td { padding: 10px 12px; }
+table:not(.pr-table):not(.ci-table):not(.pr-mes-table) tbody tr { background: var(--row-bg, transparent); }
+table:not(.pr-table):not(.ci-table):not(.pr-mes-table) tbody tr:hover { --row-bg: rgba(var(--secondary-rgb), .05); }
+.table-container { border-radius: 10px; }
+
+/* Buscador + selects de las barras de filtros = pr-search / pr-select */
+.filters-row select.form-control, select.form-control { font-weight: 600; font-size: 12.5px; cursor: pointer; }
+
+/* Etiquetas y chips más compactos, como los cargos de Productividad */
+.badge { font-size: 11px; }
+
+/* ── Etiquetas de color (concepto, estado, área…) ────────────────────────────
+   Un solo color base en --tag: el fondo es translúcido y el texto se aclara
+   u oscurece solo según el modo (claro/oscuro), igual que las etiquetas de
+   Productividad. Uso: <span className="badge tag-c" style={{ '--tag': color }}> */
+.tag-c {
+  background: color-mix(in srgb, var(--tag, var(--text-muted)) 14%, transparent);
+  color: color-mix(in srgb, var(--tag, var(--text-muted)) 78%, #000);
+}
+.tag-c--line { border: 1px solid color-mix(in srgb, var(--tag, var(--text-muted)) 32%, transparent); }
+:root[data-theme="dark"] .tag-c {
+  background: color-mix(in srgb, var(--tag, var(--text-muted)) 22%, transparent);
+  color: color-mix(in srgb, var(--tag, var(--text-muted)) 42%, #fff);
+}
+
+/* ── Tablas anchas: se nota que hay más columnas a los lados ─────────────────
+   Sombras laterales que aparecen solo cuando hay contenido oculto (scroll
+   horizontal) + barra de desplazamiento visible. No afecta a las tablas
+   de Productividad (usan .pr-table-scroll / .ci-table-scroll). */
+.table-container {
+  background:
+    linear-gradient(to right, var(--surface) 30%, transparent) 0 0 / 36px 100% no-repeat local,
+    linear-gradient(to left,  var(--surface) 30%, transparent) 100% 0 / 36px 100% no-repeat local,
+    radial-gradient(farthest-side at 0 50%,   rgba(var(--primary-rgb), .16), transparent) 0 0 / 14px 100% no-repeat scroll,
+    radial-gradient(farthest-side at 100% 50%, rgba(var(--primary-rgb), .16), transparent) 100% 0 / 14px 100% no-repeat scroll;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) transparent;
+}
+/* Primera columna (la persona) fija al desplazarse: no se pierde el contexto
+   al ver las columnas del final. --row-bg permite que filas con color propio
+   (retirado, en alerta) pinten también la celda fija. */
+.table-container thead th {
+  position: sticky; top: 0; z-index: 2;
+  background: var(--surface); box-shadow: 0 1px 0 0 var(--border);
+}
+.table-container thead th:first-child { left: 0; z-index: 3; }
+.table-container tbody tr { transition: background-color .15s ease; }
+.table-container tbody td:first-child {
+  position: sticky; left: 0; z-index: 1;
+  background-color: var(--surface);
+  background-image: linear-gradient(var(--row-bg, transparent), var(--row-bg, transparent));
+}
+.table-container::-webkit-scrollbar { height: 9px; }
+.table-container::-webkit-scrollbar-thumb { background: var(--border); border-radius: 99px; border: 2px solid transparent; background-clip: padding-box; }
+.table-container::-webkit-scrollbar-thumb:hover { background: var(--secondary); background-clip: padding-box; border: 2px solid transparent; }
+
+@media (prefers-reduced-motion: reduce) { .page-header { animation: none; } }

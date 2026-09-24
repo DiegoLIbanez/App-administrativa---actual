@@ -35,7 +35,7 @@ export default function ModalDetalle({ row, onClose, onEdit, allRows = [] }) {
       <div className="modal" style={{ maxWidth: 580 }}>
         <div className="modal-header">
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            <div style={{ width: 38, height: 38, borderRadius: '50%', background: '#FEF3C7', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+            <div style={{ width: 38, height: 38, borderRadius: '50%', background: 'var(--warning-bg)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
               <Sun size={18} style={{ color: '#D97706' }} />
             </div>
             <div>
@@ -78,7 +78,7 @@ export default function ModalDetalle({ row, onClose, onEdit, allRows = [] }) {
               <span>Guardado: <strong>{dineroGuardado != null ? `${dineroGuardado} días` : '—'}</strong> | Calculado: <strong>{dineroCalculado != null ? `${dineroCalculado} días` : '—'}</strong></span>
               {dineroCalculado != null && (
                 dineroCoincide ? (
-                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 12, fontWeight: 700, color: '#166534' }}>
+                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 12, fontWeight: 700, color: 'var(--success-text)' }}>
                     <CheckCircle2 size={14} /> Coincide
                   </span>
                 ) : (

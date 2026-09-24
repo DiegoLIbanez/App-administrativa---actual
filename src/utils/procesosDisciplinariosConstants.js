@@ -27,7 +27,7 @@ export const normalizeNombre = (s) => (s || '').trim().toLowerCase()
 
 // Paleta de alerta centralizada (evita repetir los mismos hex por todo el archivo)
 export const ALERT = {
-  bg: '#FEF2F2', bgStrong: '#FEE2E2', border: '#FCA5A5', text: '#991B1B', solid: '#DC2626',
+  bg: 'var(--danger-bg)', bgStrong: 'var(--danger-bg)', border: 'color-mix(in srgb, var(--danger) 35%, transparent)', text: 'var(--danger-text)', solid: '#DC2626',
 }
 
 // Formatea un tamaño en bytes a una etiqueta legible (KB / MB)

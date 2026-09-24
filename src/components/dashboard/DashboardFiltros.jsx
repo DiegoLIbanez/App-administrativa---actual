@@ -115,7 +115,7 @@ export default function DashboardFiltros({
           <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', width: 60, flexShrink: 0 }}>ÁREA</span>
           <span style={{
             display: 'inline-flex', alignItems: 'center', gap: 6, padding: '4px 10px', borderRadius: 20,
-            fontSize: 12, fontWeight: 600, background: '#EEF2FF', color: '#4338CA',
+            fontSize: 12, fontWeight: 600, background: 'var(--info-bg)', color: 'var(--info-text)',
           }}>
             {filterDependencia}
             <X size={13} style={{ cursor: 'pointer' }} onClick={() => setFilterDependencia('')} />

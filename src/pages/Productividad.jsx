@@ -7,6 +7,7 @@ import {
   DEPTOS, MESES, MESES_FULL,
   CIERRE_CFG, ANIO_ACTUAL,
 } from '../utils/productividadConstants'
+import { calcPct } from '../utils/productividadHelpers'
 import PersonaModal from '../components/productividad/PersonaModal'
 import DetalleModal from '../components/productividad/DetalleModal'
 import ProcesosDisciplinariosModal from '../components/productividad/ProcesosDisciplinariosModal'
@@ -42,7 +43,6 @@ export default function Productividad() {
           personaLabel: 'Colaborador(a)',
           personaLabelLower: 'colaborador(a)',
           unidadPlural: 'registros',
-          esPorcentaje: false,
         }
       })
       return res
@@ -69,7 +69,7 @@ export default function Productividad() {
   const [busqueda, setBusqueda] = useState('')
   const [filtroCargo, setFiltroCargo] = useState('todos')
   const [mesFiltro, setMesFiltro] = useState('todos') // 'todos' o índice de MESES (0=Ene ... 11=Dic) como string
-  const [ordenCol, setOrdenCol] = useState('total')
+  const [ordenCol, setOrdenCol] = useState('resueltos')
   const [ordenDir, setOrdenDir] = useState('desc')
   const [anioActivo, setAnioActivo] = useState(ANIO_ACTUAL)
 
@@ -80,7 +80,7 @@ export default function Productividad() {
   const {
     datosCrudos, cargando, refrescando, errorCarga,
     guardando, errorGuardado, setErrorGuardado, eliminandoNombre,
-    cargarDatos, guardarPersona, eliminarPersona,
+    cargarDatos, guardarPersona, eliminarPersona, importarFilas,
   } = useProductividadDatos({ cfg, deptoActivo, esCierre, modal, setModal, setAnioActivo, currentCompany })
 
 
@@ -90,56 +90,71 @@ export default function Productividad() {
     setBusqueda('')
     setFiltroCargo('todos')
     setMesFiltro('todos')
-    setOrdenCol('total')
+    setOrdenCol('resueltos')
     setOrdenDir('desc')
   }
 
-  // Vista aplanada del año activo: cada persona con su arreglo de 12 meses de ese año.
-  // Para departamentos de porcentaje (esPorcentaje), el total de cada persona se calcula
-  // como el promedio de los meses que sí tienen dato (no la suma cruda de porcentajes).
+  // Vista aplanada del año activo: cada persona con sus 12 meses de clientes
+  // asignados y resueltos de ese año. El porcentaje de resolución nunca se
+  // guarda: siempre es resueltos ÷ asignados (solo esos dos valores).
   const datos = useMemo(() => datosCrudos.map(p => {
-    const meses = p.mesesPorAnio[anioActivo] || Array(MESES.length).fill(0)
-    let total
-    if (cfg.esPorcentaje) {
-      const conDato = meses.filter(v => v > 0)
-      total = conDato.length ? Math.round((conDato.reduce((s, v) => s + v, 0) / conDato.length) * 10) / 10 : 0
-    } else {
-      total = meses.reduce((s, v) => s + v, 0)
-    }
-    return { ...p, meses, total }
-  }), [datosCrudos, anioActivo, cfg.esPorcentaje])
+    const resueltos = p.resueltosPorAnio[anioActivo] || Array(MESES.length).fill(0)
+    const asignados = p.asignadosPorAnio[anioActivo] || Array(MESES.length).fill(0)
+    const totalResueltos = resueltos.reduce((s, v) => s + v, 0)
+    const totalAsignados = asignados.reduce((s, v) => s + v, 0)
+    return { ...p, resueltos, asignados, totalResueltos, totalAsignados, pct: calcPct(totalResueltos, totalAsignados) }
+  }), [datosCrudos, anioActivo])
 
   const mesFiltroIdx = mesFiltro === 'todos' ? -1 : Number(mesFiltro)
-  const valorPeriodo = useCallback((v) => (mesFiltroIdx >= 0 ? v.meses[mesFiltroIdx] : v.total), [mesFiltroIdx])
+  // { asig, resu, pct } de una persona en el período seleccionado (mes o año completo)
+  const statsPeriodo = useCallback((v) => {
+    if (mesFiltroIdx >= 0) {
+      const asig = v.asignados[mesFiltroIdx]
+      const resu = v.resueltos[mesFiltroIdx]
+      return { asig, resu, pct: calcPct(resu, asig) }
+    }
+    return { asig: v.totalAsignados, resu: v.totalResueltos, pct: v.pct }
+  }, [mesFiltroIdx])
+  const valorPeriodo = useCallback((v) => statsPeriodo(v).resu, [statsPeriodo])
 
   const cargosUnicos = useMemo(
     () => Array.from(new Set(datos.map(v => v.cargo).filter(Boolean))),
     [datos]
   )
 
-  const monthlyTotals = useMemo(
-    () => MESES.map((_, i) => {
-      if (!cfg.esPorcentaje) return datos.reduce((s, v) => s + v.meses[i], 0)
-      const conDato = datos.filter(v => v.meses[i] > 0)
-      return conDato.length ? Math.round((conDato.reduce((s, v) => s + v.meses[i], 0) / conDato.length) * 10) / 10 : 0
-    }),
-    [datos, cfg.esPorcentaje]
+  const monthlyAsignados = useMemo(
+    () => MESES.map((_, i) => datos.reduce((s, v) => s + v.asignados[i], 0)),
+    [datos]
   )
-  const maxMensual = Math.max(...monthlyTotals, 1)
+  const monthlyTotals = useMemo( // clientes resueltos por mes (equipo)
+    () => MESES.map((_, i) => datos.reduce((s, v) => s + v.resueltos[i], 0)),
+    [datos]
+  )
+  const monthlyPct = useMemo(
+    () => monthlyTotals.map((r, i) => calcPct(r, monthlyAsignados[i])),
+    [monthlyTotals, monthlyAsignados]
+  )
+  const maxMensual = Math.max(...monthlyTotals, ...(cfg.usaClientes ? monthlyAsignados : []), 1)
   const mesesConDatos = monthlyTotals.map((v, i) => ({ v, i })).filter(m => m.v > 0)
   const mejorMesIdx = mesesConDatos.length
     ? mesesConDatos.reduce((a, b) => (b.v > a.v ? b : a)).i
     : -1
 
-  const totalGeneral = (() => {
-    if (!cfg.esPorcentaje) return datos.reduce((s, v) => s + valorPeriodo(v), 0)
-    const conDato = datos.filter(v => valorPeriodo(v) > 0)
-    return conDato.length ? Math.round((conDato.reduce((s, v) => s + valorPeriodo(v), 0) / conDato.length) * 10) / 10 : 0
-  })()
-  const promedioEquipo = cfg.esPorcentaje ? totalGeneral : (datos.length ? totalGeneral / datos.length : 0)
+  const resumenPeriodo = useMemo(() => {
+    const asignados = datos.reduce((s, v) => s + statsPeriodo(v).asig, 0)
+    const resueltos = datos.reduce((s, v) => s + statsPeriodo(v).resu, 0)
+    return { asignados, resueltos, pct: calcPct(resueltos, asignados) }
+  }, [datos, statsPeriodo])
+  const totalGeneral = resumenPeriodo.resueltos
+  const promedioEquipo = datos.length ? totalGeneral / datos.length : 0
+  // Ranking: más clientes resueltos primero; a igualdad, mayor % de resolución
   const rankedByPeriodo = useMemo(
-    () => [...datos].sort((a, b) => valorPeriodo(b) - valorPeriodo(a)),
-    [datos, valorPeriodo]
+    () => [...datos].sort((a, b) => {
+      const sa = statsPeriodo(a)
+      const sb = statsPeriodo(b)
+      return (sb.resu - sa.resu) || (sb.pct - sa.pct)
+    }),
+    [datos, statsPeriodo]
   )
   const top3 = rankedByPeriodo.slice(0, 3)
   const ultimoMesVacio = monthlyTotals[monthlyTotals.length - 1] === 0
@@ -155,13 +170,14 @@ export default function Productividad() {
     if (q) list = list.filter(v => v.nombre.toLowerCase().includes(q))
     if (filtroCargo !== 'todos') list = list.filter(v => v.cargo === filtroCargo)
     const dir = ordenDir === 'asc' ? 1 : -1
+    const claveOrden = ordenCol === 'asignados' ? 'asig' : ordenCol === 'pct' ? 'pct' : 'resu'
     list.sort((a, b) => {
       if (ordenCol === 'nombre') return a.nombre.localeCompare(b.nombre) * dir
       if (ordenCol === 'cargo') return a.cargo.localeCompare(b.cargo) * dir
-      return (valorPeriodo(a) - valorPeriodo(b)) * dir
+      return (statsPeriodo(a)[claveOrden] - statsPeriodo(b)[claveOrden]) * dir
     })
     return list
-  }, [busqueda, filtroCargo, ordenCol, ordenDir, rankedByPeriodo, datos, valorPeriodo])
+  }, [busqueda, filtroCargo, ordenCol, ordenDir, rankedByPeriodo, datos, statsPeriodo])
 
   const toggleOrden = (col) => {
     if (ordenCol === col) {
@@ -182,7 +198,8 @@ export default function Productividad() {
       inicial: {
         nombre: v.nombre, cargo: v.cargo, ingreso: v.ingreso,
         anio: anioActivo,
-        meses: [...v.meses],
+        asignados: [...v.asignados],
+        resueltos: [...v.resueltos],
       },
     })
   }
@@ -234,7 +251,11 @@ export default function Productividad() {
           anio={anioActivo}
           cfg={cfg}
           onCerrar={() => setDetalle(null)}
-          onEditar={() => abrirEditar({ ...detalle, meses: detalle.mesesPorAnio[anioActivo] || Array(MESES.length).fill(0) })}
+          onEditar={() => abrirEditar({
+            ...detalle,
+            asignados: detalle.asignadosPorAnio[anioActivo] || Array(MESES.length).fill(0),
+            resueltos: detalle.resueltosPorAnio[anioActivo] || Array(MESES.length).fill(0),
+          })}
         />
       )}
       {verProcesos && (
@@ -308,17 +329,17 @@ export default function Productividad() {
       {/* KPIs */}
       <ProductividadKPIs
         cfg={cfg} etiquetaPeriodo={etiquetaPeriodo} totalGeneral={totalGeneral}
-        datos={datos} promedioEquipo={promedioEquipo}
-        rankedByPeriodo={rankedByPeriodo} valorPeriodo={valorPeriodo}
+        datos={datos} promedioEquipo={promedioEquipo} resumenPeriodo={resumenPeriodo}
+        rankedByPeriodo={rankedByPeriodo} valorPeriodo={valorPeriodo} statsPeriodo={statsPeriodo}
         mejorMesIdx={mejorMesIdx} monthlyTotals={monthlyTotals} MESES={MESES}
       />
 
       {/* Podio top 3 */}
-      <ProductividadPodio cfg={cfg} etiquetaPeriodo={etiquetaPeriodo} top3={top3} valorPeriodo={valorPeriodo} />
+      <ProductividadPodio cfg={cfg} etiquetaPeriodo={etiquetaPeriodo} top3={top3} statsPeriodo={statsPeriodo} />
 
       {/* Gráfico mensual del equipo */}
       <ProductividadChart
-        cfg={cfg} monthlyTotals={monthlyTotals} maxMensual={maxMensual}
+        cfg={cfg} monthlyTotals={monthlyTotals} monthlyAsignados={monthlyAsignados} monthlyPct={monthlyPct} maxMensual={maxMensual}
         mejorMesIdx={mejorMesIdx} mesFiltroIdx={mesFiltroIdx} setMesFiltro={setMesFiltro}
         anioActivo={anioActivo} ultimoMesVacio={ultimoMesVacio}
       />
@@ -326,12 +347,12 @@ export default function Productividad() {
       {/* Tabla de productividad */}
       <ProductividadTable
         cfg={cfg} datos={datos} filas={filas} datosCrudos={datosCrudos}
-        anioActivo={anioActivo} mesFiltroIdx={mesFiltroIdx} valorPeriodo={valorPeriodo}
+        anioActivo={anioActivo} mesFiltroIdx={mesFiltroIdx} statsPeriodo={statsPeriodo}
         busqueda={busqueda} setBusqueda={setBusqueda}
         filtroCargo={filtroCargo} setFiltroCargo={setFiltroCargo} cargosUnicos={cargosUnicos}
         mesFiltro={mesFiltro} setMesFiltro={setMesFiltro}
         ordenCol={ordenCol} ordenDir={ordenDir} toggleOrden={toggleOrden}
-        eliminandoNombre={eliminandoNombre}
+        eliminandoNombre={eliminandoNombre} importarFilas={importarFilas}
         abrirVer={abrirVer} abrirEditar={abrirEditar} eliminarPersona={eliminarPersona} setVerProcesos={setVerProcesos}
       />
       </>

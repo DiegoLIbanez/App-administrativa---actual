@@ -52,7 +52,7 @@ export default function EmpleadoHistorialModal({ selectedEmp, novedadesPorEmplea
                       const color = CONCEPTO_COLORS[tipo] || '#374151'
                       return (
                         <tr key={r.id}>
-                          <td><span className="badge" style={{ background: color + '20', color }}>{r.concepto}</span></td>
+                          <td><span className="badge tag-c" style={{ '--tag': color }}>{r.concepto}</span></td>
                           <td>{r.fecha_inicio || '—'}</td>
                           <td>{r.fecha_fin || '—'}</td>
                           <td>{r.total_dias ?? '—'}</td>

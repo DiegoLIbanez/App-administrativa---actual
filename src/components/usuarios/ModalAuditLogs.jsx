@@ -51,10 +51,10 @@ export default function ModalAuditLogs({ onClose }) {
 
   const badgeAccionStyle = (accion) => {
     const act = (accion || '').toUpperCase()
-    if (act.includes('CREAR')) return { bg: '#DCFCE7', color: '#15803D', border: '#86EFAC' }
-    if (act.includes('ACTUALIZAR') || act.includes('EDITAR')) return { bg: '#FEF3C7', color: '#B45309', border: '#FCD34D' }
-    if (act.includes('ELIMINAR') || act.includes('BORRAR')) return { bg: '#FEE2E2', color: '#B91C1C', border: '#FCA5A5' }
-    return { bg: '#DBEAFE', color: '#1D4ED8', border: '#93C5FD' }
+    if (act.includes('CREAR')) return { bg: 'var(--success-bg)', color: '#15803D', border: 'color-mix(in srgb, var(--success) 35%, transparent)' }
+    if (act.includes('ACTUALIZAR') || act.includes('EDITAR')) return { bg: 'var(--warning-bg)', color: '#B45309', border: 'color-mix(in srgb, var(--warning) 40%, transparent)' }
+    if (act.includes('ELIMINAR') || act.includes('BORRAR')) return { bg: 'var(--danger-bg)', color: 'var(--danger-text)', border: 'color-mix(in srgb, var(--danger) 35%, transparent)' }
+    return { bg: 'var(--info-bg)', color: 'var(--info-text)', border: 'color-mix(in srgb, var(--info) 35%, transparent)' }
   }
 
   return (

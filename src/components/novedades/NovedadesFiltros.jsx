@@ -76,9 +76,9 @@ export default function NovedadesFiltros({
           display: 'flex', alignItems: 'center', gap: 6, flex: '0 0 auto',
           padding: '6px 12px', borderRadius: 999, fontSize: 12, fontWeight: 700,
           cursor: 'pointer', whiteSpace: 'nowrap',
-          background: soloActivas ? '#DCFCE7' : 'var(--surface)',
-          color: soloActivas ? '#166534' : 'var(--text-muted)',
-          border: soloActivas ? '1px solid #86EFAC' : '1px solid var(--border)',
+          background: soloActivas ? 'var(--success-bg)' : 'var(--surface)',
+          color: soloActivas ? 'var(--success-text)' : 'var(--text-muted)',
+          border: soloActivas ? '1px solid color-mix(in srgb, var(--success) 35%, transparent)' : '1px solid var(--border)',
         }}
       >
         <span style={{

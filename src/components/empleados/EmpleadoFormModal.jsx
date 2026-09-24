@@ -17,13 +17,12 @@ export default function EmpleadoFormModal({
   const listaDepartamentos = departamentos && departamentos.length > 0 ? departamentos : DEPENDENCIAS
   // ── Datos derivados para el header dinámico ─────────────────────────
   const dep = form.dependencia || ''
-  const [, depText, depBorder] = DEP_COLORS[dep] || ['#EFF6FF', '#1E40AF', '#BFDBFE']
   const depIcon = DEP_ICONS[dep] || '🏢'
   const iniciales = form.nombre_completo
     ? form.nombre_completo.trim().split(' ').filter(Boolean).slice(0, 2).map(p => p[0]).join('').toUpperCase()
     : '?'
-  const gradStart = dep ? depText : '#1E3A8A'
-  const gradEnd = dep ? (depBorder || '#3B82F6') : '#2563EB'
+  const gradStart = 'var(--primary)'
+  const gradEnd = 'var(--secondary)'
 
   // Progreso basado en campos claves
   const camposOblig = [form.nombre_completo, form.dependencia, form.cargo]
@@ -35,7 +34,7 @@ export default function EmpleadoFormModal({
 
         {/* ── Header dinámico ── */}
         <div style={{
-          background: `linear-gradient(135deg, ${gradStart}dd 0%, ${gradEnd}99 100%)`,
+          background: `linear-gradient(135deg, ${gradStart} 0%, ${gradEnd} 100%)`,
           padding: '22px 24px 18px',
           borderRadius: '12px 12px 0 0',
           transition: 'background .4s ease',
@@ -112,14 +111,14 @@ export default function EmpleadoFormModal({
             <div style={{
               display: 'flex', alignItems: 'flex-start', gap: 10,
               padding: '11px 14px', borderRadius: 10, marginBottom: 18,
-              background: duplicadoWarning.tipo === 'exacto' ? '#FEF2F2' : '#FEF3C7',
-              border: `1.5px solid ${duplicadoWarning.tipo === 'exacto' ? '#FCA5A5' : '#FCD34D'}`,
+              background: duplicadoWarning.tipo === 'exacto' ? 'var(--danger-bg)' : 'var(--warning-bg)',
+              border: `1.5px solid ${duplicadoWarning.tipo === 'exacto' ? 'color-mix(in srgb, var(--danger) 35%, transparent)' : 'color-mix(in srgb, var(--warning) 40%, transparent)'}`,
             }}>
               {duplicadoWarning.tipo === 'exacto'
                 ? <AlertCircle size={15} style={{ color: '#DC2626', flexShrink: 0, marginTop: 1 }} />
                 : <AlertTriangle size={15} style={{ color: '#D97706', flexShrink: 0, marginTop: 1 }} />
               }
-              <div style={{ fontSize: 13, color: duplicadoWarning.tipo === 'exacto' ? '#991B1B' : '#92400E' }}>
+              <div style={{ fontSize: 13, color: duplicadoWarning.tipo === 'exacto' ? 'var(--danger-text)' : 'var(--warning-text)' }}>
                 {duplicadoWarning.tipo === 'exacto'
                   ? <><strong>Empleado duplicado:</strong> Ya existe "{duplicadoWarning.nombre}" con este nombre exacto.</>
                   : <><strong>Nombre similar:</strong> "{duplicadoWarning.nombre}" ya existe. Verifica que no sea un error de tipeo.</>
@@ -131,7 +130,7 @@ export default function EmpleadoFormModal({
           {/* ── S1: Identidad ── */}
           <div className="emp-section">
             <div className="emp-section-hdr">
-              <div style={{ width: 26, height: 26, borderRadius: 7, background: '#EFF6FF', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <div style={{ width: 26, height: 26, borderRadius: 7, background: 'var(--info-bg)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                 <User size={13} style={{ color: '#2563EB' }} />
               </div>
               <span style={{ fontSize: 11, fontWeight: 800, letterSpacing: '.08em', textTransform: 'uppercase', color: 'var(--text)' }}>Identidad</span>
@@ -193,12 +192,12 @@ export default function EmpleadoFormModal({
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 7 }}>
               {listaDepartamentos.map(d => {
                 const sel = form.dependencia === d
-                const [bg, text, border] = DEP_COLORS[d] || ['#EFF6FF', '#1E40AF', '#BFDBFE']
+                const [bg, text, border] = DEP_COLORS[d] || ['var(--info-bg)', 'var(--info-text)', 'color-mix(in srgb, var(--info) 30%, transparent)']
                 return (
                   <button
                     key={d} type="button"
                     className={`emp-dep-btn ${sel ? 'active' : ''}`}
-                    style={sel ? { background: bg, borderColor: border, color: text, boxShadow: `0 0 0 2px ${border}55` } : {}}
+                    style={sel ? { background: bg, borderColor: border, color: text, boxShadow: `0 0 0 2px ${border}` } : {}}
                     onClick={() => { setForm(p => ({ ...p, dependencia: d })) }}
                   >
                     <span style={{ fontSize: 16 }}>{DEP_ICONS[d] || '🏢'}</span>
@@ -213,7 +212,7 @@ export default function EmpleadoFormModal({
           {/* ── S3: Fechas y estado ── */}
           <div className="emp-section">
             <div className="emp-section-hdr">
-              <div style={{ width: 26, height: 26, borderRadius: 7, background: '#FEF3C7', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <div style={{ width: 26, height: 26, borderRadius: 7, background: 'var(--warning-bg)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                 <Calendar size={13} style={{ color: '#D97706' }} />
               </div>
               <span style={{ fontSize: 11, fontWeight: 800, letterSpacing: '.08em', textTransform: 'uppercase', color: 'var(--text)' }}>Fecha de ingreso</span>
@@ -230,21 +229,21 @@ export default function EmpleadoFormModal({
           {/* ── S4: Estado ── */}
           <div className="emp-section" style={{ marginBottom: 4 }}>
             <div className="emp-section-hdr">
-              <div style={{ width: 26, height: 26, borderRadius: 7, background: '#F0FDF4', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <div style={{ width: 26, height: 26, borderRadius: 7, background: 'var(--success-bg)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                 <CheckCircle2 size={13} style={{ color: '#16A34A' }} />
               </div>
               <span style={{ fontSize: 11, fontWeight: 800, letterSpacing: '.08em', textTransform: 'uppercase', color: 'var(--text)' }}>Estado del empleado</span>
             </div>
             <div style={{ display: 'flex', gap: 10 }}>
               <button type="button" className="emp-status-btn"
-                style={form.activo ? { border: '2px solid #16A34A', background: '#F0FDF4', color: '#166534', boxShadow: '0 0 0 3px rgba(22,163,74,.12)' } : {}}
+                style={form.activo ? { border: '2px solid #16A34A', background: 'var(--success-bg)', color: 'var(--success-text)', boxShadow: '0 0 0 3px rgba(22,163,74,.12)' } : {}}
                 onClick={() => setForm(p => ({ ...p, activo: true }))}>
                 <span style={{ fontSize: 26 }}>✅</span>
                 <span>Activo</span>
                 {form.activo && <CheckCircle2 size={13} style={{ color: '#16A34A' }} />}
               </button>
               <button type="button" className="emp-status-btn"
-                style={!form.activo ? { border: '2px solid #DC2626', background: '#FEF2F2', color: '#991B1B', boxShadow: '0 0 0 3px rgba(220,38,38,.12)' } : {}}
+                style={!form.activo ? { border: '2px solid #DC2626', background: 'var(--danger-bg)', color: 'var(--danger-text)', boxShadow: '0 0 0 3px rgba(220,38,38,.12)' } : {}}
                 onClick={() => setForm(p => ({ ...p, activo: false, fecha_retiro: p.fecha_retiro || hoyISO() }))}>
                 <span style={{ fontSize: 26 }}>🔴</span>
                 <span>Inactivo</span>

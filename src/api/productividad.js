@@ -5,6 +5,7 @@
 // Soporta filtrado y asignación por empresa ('ameriglobal' / 'global_link').
 // =============================================================
 import { supabase } from '../supabaseClient'
+import { resolverIdsEnLote } from './idResolvers'
 
 // ── productividad (Ventas / UW-BS) ──────────────────────────────────────────
 
@@ -15,21 +16,23 @@ export function listarProductividadPorDepartamento(departamento, metrica, empres
   return query
 }
 
-/** Solo los campos usados en Colaboradores, filtrado por métrica "Producción". */
-export function listarProductividadParaColaboradores(metrica = 'Producción', empresa) {
+/**
+ * Solo los campos usados en Colaboradores. Acepta una métrica o una lista:
+ * "Producción" (departamentos de un solo valor) y "Clientes Resueltos" (Ventas / UW-BS).
+ */
+export function listarProductividadParaColaboradores(metricas = ['Producción', 'Clientes Resueltos'], empresa) {
   let query = supabase
     .from('productividad')
-    .select('nombre_empleado, departamento, periodo, anio, valor, empresa')
-    .eq('metrica', metrica)
+    .select('nombre_empleado, departamento, periodo, anio, valor, metrica, empresa')
+    .in('metrica', [].concat(metricas))
   if (empresa) query = query.eq('empresa', empresa)
   return query
 }
 
-export function upsertProductividad(filas, empresa = 'ameriglobal') {
-  const formateados = (filas || []).map(f => ({
-    ...f,
-    empresa: f.empresa || empresa,
-  }))
+export async function upsertProductividad(filas, empresa = 'ameriglobal') {
+  // Se guarda igual que antes (nombre_empleado/departamento/empresa en
+  // texto); además se resuelven en lote empleado_id/departamento_id/empresa_id.
+  const formateados = await resolverIdsEnLote(filas, empresa, 'departamento')
   return supabase
     .from('productividad')
     .upsert(formateados, { onConflict: 'nombre_empleado,departamento,periodo,metrica,anio' })
@@ -49,13 +52,13 @@ export function listarResumenPorDepartamento(departamento, empresa) {
   return query
 }
 
-export function upsertResumen(payload, empresa = 'ameriglobal') {
-  const formateado = Array.isArray(payload)
-    ? payload.map(p => ({ ...p, empresa: p.empresa || empresa }))
-    : { ...payload, empresa: payload.empresa || empresa }
+export async function upsertResumen(payload, empresa = 'ameriglobal') {
+  const eraArray = Array.isArray(payload)
+  const filas = eraArray ? payload : [payload]
+  const formateados = await resolverIdsEnLote(filas, empresa, 'departamento')
   return supabase
     .from('productividad_resumen')
-    .upsert(formateado, { onConflict: 'nombre_empleado,departamento' })
+    .upsert(eraArray ? formateados : formateados[0], { onConflict: 'nombre_empleado,departamento' })
 }
 
 export function eliminarResumenDePersona(nombre, departamento, empresa) {
@@ -79,10 +82,9 @@ export function listarCierreMesesParaColaboradores(empresa) {
   return query
 }
 
-export function upsertCierreMeses(filas, empresa = 'ameriglobal') {
-  const formateados = (filas || []).map(f => ({
-    ...f,
-    empresa: f.empresa || empresa,
-  }))
+export async function upsertCierreMeses(filas, empresa = 'ameriglobal') {
+  // cierre_meses no tiene columna de departamento, por eso no se pasa
+  // campoDependencia (queda en null y no se agrega departamento_id).
+  const formateados = await resolverIdsEnLote(filas, empresa)
   return supabase.from('cierre_meses').upsert(formateados, { onConflict: 'nombre_empleado,anio,mes' })
 }

@@ -5,11 +5,19 @@ export function fmtMoneda(v) {
   return `$ ${n.toLocaleString('es-CO', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
 }
 
-// Escala de color de desempeño para las métricas en % (semáforo simple)
+// Porcentaje de resolución: clientes resueltos ÷ clientes asignados (entero).
+// Si no hay asignados, devuelve 0 (evita dividir por cero).
+export function calcPct(resueltos, asignados) {
+  const a = Number(asignados) || 0
+  const r = Number(resueltos) || 0
+  return a > 0 ? Math.round((r / a) * 100) : 0
+}
+
+// Escala de color de desempeño para las métricas en % (semáforo simple con buen contraste)
 export function colorPct(v) {
-  if (v >= 80) return '#16A34A'
+  if (v >= 80) return '#10B981'
   if (v >= 50) return '#F59E0B'
-  return 'var(--text)'
+  return '#EF4444'
 }
 
 // ¿Esta persona todavía no había ingresado en el mes/año dado?

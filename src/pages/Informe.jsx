@@ -1,3 +1,5 @@
+import PageTitle from '../components/ui/PageTitle'
+import { FileBarChart as TitleIcon } from 'lucide-react'
 import { useState, useEffect, useMemo } from 'react'
 import * as novedadesApi from '../api/novedades'
 import * as empleadosApi from '../api/empleados'
@@ -160,7 +162,7 @@ export default function Informe() {
     <div>
       <div className="page-header" style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 16, flexWrap: 'wrap' }}>
         <div>
-          <h1>Informe General</h1>
+          <PageTitle icon={TitleIcon}>Informe General</PageTitle>
           <p>Resumen completo de novedades y empleados en la base de datos.</p>
         </div>
         <div style={{ display: 'flex', gap: 8 }}>
@@ -198,12 +200,12 @@ export default function Informe() {
             </div>
             <div className="stat-card">
               <div className="stat-label">Empleados activos</div>
-              <div className="stat-value" style={{ color: '#166534' }}>{informe.empleadosActivos}</div>
+              <div className="stat-value" style={{ color: 'var(--success-text)' }}>{informe.empleadosActivos}</div>
               <div className="stat-sub">de {informe.totalEmpleados} registrados</div>
             </div>
             <div className="stat-card">
               <div className="stat-label">Empleados inactivos</div>
-              <div className="stat-value" style={{ color: '#991B1B' }}>{informe.empleadosInactivos}</div>
+              <div className="stat-value" style={{ color: 'var(--danger-text)' }}>{informe.empleadosInactivos}</div>
             </div>
             <div className="stat-card">
               <div className="stat-label">Con alguna novedad</div>

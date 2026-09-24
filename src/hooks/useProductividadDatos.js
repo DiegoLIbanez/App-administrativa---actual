@@ -2,15 +2,21 @@ import { useState, useEffect, useCallback } from 'react'
 import * as empleadosApi from '../api/empleados'
 import * as productividadApi from '../api/productividad'
 import * as procesosApi from '../api/procesosDisciplinarios'
-import { METRICA, MESES, MESES_FULL, ANIO_ACTUAL, normalizeNombre } from '../utils/productividadConstants'
+import { METRICA, METRICA_ASIGNADOS, METRICA_RESUELTOS, MESES, MESES_FULL, ANIO_ACTUAL, normalizeNombre } from '../utils/productividadConstants'
 
 // Encapsula la carga de datos (empleados + resumen + productividad + procesos
 // disciplinarios) y las operaciones de guardado/eliminación para la vista
 // principal de Productividad (Ventas / UW-BS). La vista de "Cierre" tiene su
 // propia lógica en CierreView.jsx, separada porque su modelo de datos es
-// distinto (varias métricas por persona/mes en vez de un solo valor).
+// distinto (tabla propia con métricas financieras adicionales).
+//
+// Modelo de datos por persona:
+//   resueltosPorAnio: { 2026: [12 valores] }  → Clientes Resueltos
+//   asignadosPorAnio: { 2026: [12 valores] }  → Clientes Asignados
+// (En departamentos sin usaClientes, "resueltos" guarda el valor único
+// "Producción" y "asignados" queda vacío.)
 export function useProductividadDatos({ cfg, deptoActivo, esCierre, modal, setModal, setAnioActivo, currentCompany }) {
-  const [datosCrudos, setDatosCrudos] = useState([]) // [{ nombre, cargo, ingreso, procesos, mesesPorAnio: {2025:[...], 2026:[...]} }]
+  const [datosCrudos, setDatosCrudos] = useState([]) // [{ nombre, cargo, ingreso, procesos, resueltosPorAnio: {2025:[...]}, asignadosPorAnio: {2025:[...]} }]
   const [cargando, setCargando] = useState(true)
   const [refrescando, setRefrescando] = useState(false)
   const [errorCarga, setErrorCarga] = useState(null)
@@ -22,15 +28,19 @@ export function useProductividadDatos({ cfg, deptoActivo, esCierre, modal, setMo
     silencioso ? setRefrescando(true) : setCargando(true)
     setErrorCarga(null)
     try {
-      const [empleadosRes, resumenRes, prodRes, procesosRes] = await Promise.all([
+      const [empleadosRes, resumenRes, prodRes, asigRes, procesosRes] = await Promise.all([
         empleadosApi.listarEmpleadosActivosPorDependencia(cfg.dependenciaEmpleados, currentCompany),
         productividadApi.listarResumenPorDepartamento(cfg.departamento, currentCompany),
-        productividadApi.listarProductividadPorDepartamento(cfg.departamento, METRICA, currentCompany),
+        productividadApi.listarProductividadPorDepartamento(cfg.departamento, cfg.usaClientes ? METRICA_RESUELTOS : METRICA, currentCompany),
+        cfg.usaClientes
+          ? productividadApi.listarProductividadPorDepartamento(cfg.departamento, METRICA_ASIGNADOS, currentCompany)
+          : Promise.resolve({ data: [], error: null }),
         procesosApi.listarProcesosDisciplinariosPorDepartamento(cfg.dependenciaEmpleados, currentCompany),
       ])
       if (empleadosRes.error) throw empleadosRes.error
       if (resumenRes.error) throw resumenRes.error
       if (prodRes.error) throw prodRes.error
+      if (asigRes.error) throw asigRes.error
       // Los procesos disciplinarios son un "plus" informativo: si falla esa consulta
       // (p.ej. permisos) no debe romper toda la vista de Productividad.
       if (procesosRes.error) console.error('No se pudieron cargar procesos disciplinarios:', procesosRes.error)
@@ -60,7 +70,8 @@ export function useProductividadDatos({ cfg, deptoActivo, esCierre, modal, setMo
           nombre: e.nombre_completo,
           cargo: e.cargo || '',
           ingreso: e.fecha_ingreso || '',
-          mesesPorAnio: {},
+          resueltosPorAnio: {},
+          asignadosPorAnio: {},
           procesos: procesosPorNombre.get(normalizeNombre(e.nombre_completo)) || [],
         })
       })
@@ -77,15 +88,17 @@ export function useProductividadDatos({ cfg, deptoActivo, esCierre, modal, setMo
         })
       })
       let anioMasReciente = 0
-      prodRes.data.forEach(p => {
+      const volcar = (filas, destino) => filas.forEach(p => {
         const row = porNombre.get(p.nombre_empleado)
         if (!row) return
         const idx = MESES_FULL.indexOf(p.periodo)
         if (idx < 0) return
-        if (!row.mesesPorAnio[p.anio]) row.mesesPorAnio[p.anio] = Array(MESES.length).fill(0)
-        row.mesesPorAnio[p.anio][idx] = Number(p.valor) || 0
+        if (!row[destino][p.anio]) row[destino][p.anio] = Array(MESES.length).fill(0)
+        row[destino][p.anio][idx] = Number(p.valor) || 0
         if (p.anio > anioMasReciente) anioMasReciente = p.anio
       })
+      volcar(prodRes.data, 'resueltosPorAnio')
+      volcar(asigRes.data, 'asignadosPorAnio')
 
       setDatosCrudos(Array.from(porNombre.values()))
       if (!silencioso && anioMasReciente) setAnioActivo(anioMasReciente)
@@ -110,9 +123,10 @@ export function useProductividadDatos({ cfg, deptoActivo, esCierre, modal, setMo
     const anio = Number(form.anio) || ANIO_ACTUAL
 
     try {
-      const totalAnio = form.meses.reduce((s, v) => s + (Number(v) || 0), 0)
-      // El total_periodo guardado en el resumen refleja el total histórico (todos los años ya cargados + este)
-      const totalHistorico = Object.entries(modal?.persona?.mesesPorAnio || {})
+      const totalAnio = form.resueltos.reduce((s, v) => s + (Number(v) || 0), 0)
+      // El total_periodo guardado en el resumen refleja el total histórico de
+      // clientes resueltos (todos los años ya cargados + este)
+      const totalHistorico = Object.entries(modal?.persona?.resueltosPorAnio || {})
         .reduce((s, [a, meses]) => s + (Number(a) === anio ? 0 : meses.reduce((x, y) => x + y, 0)), 0) + totalAnio
 
       const { error: eResumen } = await productividadApi.upsertResumen({
@@ -125,15 +139,19 @@ export function useProductividadDatos({ cfg, deptoActivo, esCierre, modal, setMo
         }, currentCompany)
       if (eResumen) throw eResumen
 
-      const filasProd = MESES_FULL.map((periodo, i) => ({
+      const ahora = new Date().toISOString()
+      const filasDe = (metrica, valores) => MESES_FULL.map((periodo, i) => ({
         nombre_empleado: nombreTrim,
         departamento: cfg.departamento,
         periodo,
-        metrica: METRICA,
+        metrica,
         anio,
-        valor: Number(form.meses[i]) || 0,
-        updated_at: new Date().toISOString(),
+        valor: Number(valores[i]) || 0,
+        updated_at: ahora,
       }))
+      const filasProd = cfg.usaClientes
+        ? [...filasDe(METRICA_ASIGNADOS, form.asignados), ...filasDe(METRICA_RESUELTOS, form.resueltos)]
+        : filasDe(METRICA, form.resueltos)
       const { error: eProd } = await productividadApi.upsertProductividad(filasProd, currentCompany)
       if (eProd) throw eProd
 
@@ -148,6 +166,23 @@ export function useProductividadDatos({ cfg, deptoActivo, esCierre, modal, setMo
     }
   }
 
+  // Importación masiva desde Excel (Ventas / UW-BS). Recibe filas ya validadas:
+  // { nombre, anio, mes, asignados?, resueltos? }. Un valor ausente no se toca.
+  async function importarFilas(filas) {
+    const ahora = new Date().toISOString()
+    const rows = []
+    filas.forEach(({ nombre, anio, mes, asignados, resueltos }) => {
+      const base = { nombre_empleado: nombre, departamento: cfg.departamento, periodo: mes, anio, updated_at: ahora }
+      if (asignados !== undefined) rows.push({ ...base, metrica: METRICA_ASIGNADOS, valor: asignados })
+      if (resueltos !== undefined) rows.push({ ...base, metrica: METRICA_RESUELTOS, valor: resueltos })
+    })
+    for (let i = 0; i < rows.length; i += 400) {
+      const { error } = await productividadApi.upsertProductividad(rows.slice(i, i + 400), currentCompany)
+      if (error) throw error
+    }
+    await cargarDatos({ silencioso: true })
+  }
+
   async function eliminarPersona(nombre) {
     if (!window.confirm(`¿Borrar todo el historial de ${nombre}? Sus valores quedarán en 0. Como sigue activo(a) en ${cfg.tabLabel}, la persona seguirá apareciendo en la lista. Esta acción no se puede deshacer.`)) return
     setEliminandoNombre(nombre)
@@ -158,7 +193,7 @@ export function useProductividadDatos({ cfg, deptoActivo, esCierre, modal, setMo
       if (e2) throw e2
       // Sigue activo(a) en Ventas: se queda en la lista, solo con los datos en 0.
       setDatosCrudos(prev => prev.map(d => d.nombre === nombre
-        ? { ...d, mesesPorAnio: {} }
+        ? { ...d, resueltosPorAnio: {}, asignadosPorAnio: {} }
         : d))
     } catch (err) {
       console.error(err)
@@ -173,6 +208,6 @@ export function useProductividadDatos({ cfg, deptoActivo, esCierre, modal, setMo
     cargando, refrescando, errorCarga,
     guardando, errorGuardado, setErrorGuardado,
     eliminandoNombre,
-    cargarDatos, guardarPersona, eliminarPersona,
+    cargarDatos, guardarPersona, eliminarPersona, importarFilas,
   }
 }

@@ -1,3 +1,5 @@
+import PageTitle from '../components/ui/PageTitle'
+import { Contact as TitleIcon } from 'lucide-react'
 import { useState, useEffect, useCallback, useMemo } from 'react'
 import { useCompany } from '../context/CompanyContext'
 import * as empleadosApi from '../api/empleados'
@@ -301,7 +303,7 @@ export default function Empleados() {
     <div>
       <div className="page-header" style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', flexWrap: 'wrap', gap: 10 }}>
         <div>
-          <h1>Empleados</h1>
+          <PageTitle icon={TitleIcon}>Empleados</PageTitle>
           <p>Gestiona el directorio de colaboradores de {companyConfig.nombre}</p>
         </div>
         <div style={{ display: 'flex', gap: 8 }}>

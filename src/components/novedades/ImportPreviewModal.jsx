@@ -22,16 +22,16 @@ export default function ImportPreviewModal({ importPreview, importConfirming, on
             </div>
             <div className="modal-body" style={{ maxHeight: '62vh', overflowY: 'auto' }}>
               <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 14 }}>
-                <span style={{ ...PILL_BASE, background: '#DCFCE7', color: '#166534', border: '1px solid #86EFAC' }}>
+                <span style={{ ...PILL_BASE, background: 'var(--success-bg)', color: 'var(--success-text)', border: '1px solid color-mix(in srgb, var(--success) 35%, transparent)' }}>
                   ✓ {validas.length} listas para importar
                 </span>
                 {conAdvertencia.length > 0 && (
-                  <span style={{ ...PILL_BASE, background: '#FEF3C7', color: '#92400E', border: '1px solid #FCD34D' }}>
+                  <span style={{ ...PILL_BASE, background: 'var(--warning-bg)', color: 'var(--warning-text)', border: '1px solid color-mix(in srgb, var(--warning) 40%, transparent)' }}>
                     ⚠ {conAdvertencia.length} con advertencia (se importan igual)
                   </span>
                 )}
                 {omitidas.length > 0 && (
-                  <span style={{ ...PILL_BASE, background: '#FEE2E2', color: '#991B1B', border: '1px solid #FCA5A5' }}>
+                  <span style={{ ...PILL_BASE, background: 'var(--danger-bg)', color: 'var(--danger-text)', border: '1px solid color-mix(in srgb, var(--danger) 35%, transparent)' }}>
                     ✕ {omitidas.length} se van a omitir
                   </span>
                 )}

@@ -5,6 +5,7 @@
 // =============================================================
 import { supabase } from '../supabaseClient'
 import { diasHabilesEntre } from '../utils/diasHabiles'
+import { resolverIdsRelacionales } from './idResolvers'
 
 const TABLA = 'novedades'
 
@@ -22,10 +23,21 @@ export function listarNovedadesCompleto(empresa) {
   return query
 }
 
-export function crearNovedad(payload, empresa = 'ameriglobal') {
+export async function crearNovedad(payload, empresa = 'ameriglobal') {
+  const empresaFinal = payload.empresa || empresa
+  // Igual que antes se guarda nombre_empleado/dependencia/empresa en texto;
+  // además buscamos sus ids relacionales para dejar la novedad conectada.
+  const { empleado_id, departamento_id, empresa_id } = await resolverIdsRelacionales({
+    nombre_empleado: payload.nombre_empleado,
+    empresa: empresaFinal,
+    dependencia: payload.dependencia,
+  })
   return supabase.from(TABLA).insert([{
     ...payload,
-    empresa: payload.empresa || empresa,
+    empresa: empresaFinal,
+    empleado_id,
+    departamento_id,
+    empresa_id,
   }]).select()
 }
 
@@ -41,8 +53,31 @@ export function buscarNovedadPorEmpleadoConceptoYFecha(nombreEmpleado, concepto,
   return query
 }
 
-export function actualizarNovedad(id, payload) {
-  return supabase.from(TABLA).update(payload).eq('id', id).select()
+export async function actualizarNovedad(id, payload) {
+  const dataToUpdate = { ...payload }
+
+  // Solo recalculamos los ids si el update toca empleado, dependencia o empresa.
+  if (payload.nombre_empleado || payload.dependencia || payload.empresa) {
+    let { nombre_empleado, dependencia, empresa } = payload
+    if (!nombre_empleado || !dependencia || !empresa) {
+      const { data: actual } = await supabase
+        .from(TABLA)
+        .select('nombre_empleado, dependencia, empresa')
+        .eq('id', id)
+        .maybeSingle()
+      nombre_empleado = nombre_empleado || actual?.nombre_empleado
+      dependencia = dependencia || actual?.dependencia
+      empresa = empresa || actual?.empresa
+    }
+    const { empleado_id, departamento_id, empresa_id } = await resolverIdsRelacionales({
+      nombre_empleado, empresa, dependencia,
+    })
+    dataToUpdate.empleado_id = empleado_id
+    dataToUpdate.departamento_id = departamento_id
+    dataToUpdate.empresa_id = empresa_id
+  }
+
+  return supabase.from(TABLA).update(dataToUpdate).eq('id', id).select()
 }
 
 /** Actualiza un solo campo de una novedad (edición inline en la tabla). */

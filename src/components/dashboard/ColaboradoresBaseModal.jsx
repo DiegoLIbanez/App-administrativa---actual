@@ -42,10 +42,10 @@ export default function ColaboradoresBaseModal({ show, onCerrar, diasPeriodoLabe
                       <td style={{ padding: '6px 8px', color: 'var(--text-muted)' }}>{e.fecha_ingreso || '—'}</td>
                       <td style={{ padding: '6px 8px' }}>
                         {e.activo === false
-                          ? <span style={{ color: '#991B1B', fontWeight: 600 }}>
+                          ? <span style={{ color: 'var(--danger-text)', fontWeight: 600 }}>
                               Inactivo{e.fecha_retiro ? ` · retiro ${e.fecha_retiro}` : ' · sin fecha de retiro'}
                             </span>
-                          : <span style={{ color: '#166534', fontWeight: 600 }}>Activo</span>}
+                          : <span style={{ color: 'var(--success-text)', fontWeight: 600 }}>Activo</span>}
                       </td>
                     </tr>
                   ))}

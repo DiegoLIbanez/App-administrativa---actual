@@ -1,3 +1,5 @@
+import PageTitle from '../components/ui/PageTitle'
+import { Users as TitleIcon } from 'lucide-react'
 import { useState, useEffect, useMemo, useCallback } from 'react'
 import { useCompany } from '../context/CompanyContext'
 import * as novedadesApi from '../api/novedades'
@@ -50,7 +52,7 @@ export default function Colaboradores() {
       procesosApi.listarNombresProcesosDisciplinarios(currentCompany),
       // Mismas tablas que usa la página Productividad: "productividad" cubre
       // Ventas y UW-BS (una fila por persona/mes/año), "cierre_meses" cubre Cierre.
-      productividadApi.listarProductividadParaColaboradores('Producción', currentCompany),
+      productividadApi.listarProductividadParaColaboradores(['Producción', 'Clientes Resueltos'], currentCompany),
       productividadApi.listarCierreMesesParaColaboradores(currentCompany),
     ]).then(([{ data }, { data: empData }, { data: pdData }, { data: prodData }, { data: cierreData }]) => {
       setRows(data || [])
@@ -62,7 +64,7 @@ export default function Colaboradores() {
         pdAcc[k] = (pdAcc[k] || 0) + 1
       })
       setProcesosPorEmpleado(pdAcc)
-      setProductividadData(construirProductividad(prodData, cierreData))
+      setProductividadData(construirProductividad(prodData, cierreData, { usaClientes: currentCompany !== 'global_link' }))
       setLoading(false)
     })
   }, [currentCompany])
@@ -258,7 +260,7 @@ export default function Colaboradores() {
     <div>
       <div className="page-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 10 }}>
         <div>
-          <h1>Colaboradores</h1>
+          <PageTitle icon={TitleIcon}>Colaboradores</PageTitle>
           <p>Historial de novedades por colaborador</p>
         </div>
         <button className="btn btn-ghost" onClick={exportExcel} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>

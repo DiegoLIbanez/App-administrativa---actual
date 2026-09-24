@@ -1,38 +1,34 @@
 import { Award, Medal } from 'lucide-react'
 import { iniciales } from '../../utils/productividadHelpers'
 
-export default function ProductividadPodio({ cfg, etiquetaPeriodo, top3, valorPeriodo }) {
+export default function ProductividadPodio({ cfg, etiquetaPeriodo, top3, statsPeriodo }) {
+  const renderItem = (persona, clase, medalla) => {
+    if (!persona) return null
+    const st = statsPeriodo(persona)
+    return (
+      <div className={`pr-podio-item ${clase}`}>
+        {medalla && <Medal size={16} color="#F59E0B" />}
+        <div className="pr-podio-avatar">{iniciales(persona.nombre)}</div>
+        <span className="pr-podio-name">{persona.nombre}</span>
+        <span className="pr-podio-total">{st.resu}</span>
+        {cfg.usaClientes && (
+          <span className="ci-podio-sub">de {st.asig} asignados ({st.pct}%)</span>
+        )}
+        <div className="pr-podio-bar" />
+      </div>
+    )
+  }
+
   return (
     <div className="pr-card">
       <div className="pr-card-head">
-        <span className="pr-card-title"><Award size={15} color="#0F2A47" /> Top 3 {etiquetaPeriodo}</span>
+        <span className="pr-card-title"><Award size={16} /> Top 3 {etiquetaPeriodo}</span>
+        {cfg.usaClientes && <span className="pr-count">Clasificación por clientes resueltos</span>}
       </div>
       <div className="pr-podio">
-        {top3[1] && (
-          <div className="pr-podio-item pr-podio-2">
-            <div className="pr-podio-avatar">{iniciales(top3[1].nombre)}</div>
-            <span className="pr-podio-name">{top3[1].nombre}</span>
-            <span className="pr-podio-total">{valorPeriodo(top3[1])}{cfg.esPorcentaje ? '%' : ''}</span>
-            <div className="pr-podio-bar" />
-          </div>
-        )}
-        {top3[0] && (
-          <div className="pr-podio-item pr-podio-1">
-            <Medal size={16} color="#F59E0B" />
-            <div className="pr-podio-avatar">{iniciales(top3[0].nombre)}</div>
-            <span className="pr-podio-name">{top3[0].nombre}</span>
-            <span className="pr-podio-total">{valorPeriodo(top3[0])}{cfg.esPorcentaje ? '%' : ''}</span>
-            <div className="pr-podio-bar" />
-          </div>
-        )}
-        {top3[2] && (
-          <div className="pr-podio-item pr-podio-3">
-            <div className="pr-podio-avatar">{iniciales(top3[2].nombre)}</div>
-            <span className="pr-podio-name">{top3[2].nombre}</span>
-            <span className="pr-podio-total">{valorPeriodo(top3[2])}{cfg.esPorcentaje ? '%' : ''}</span>
-            <div className="pr-podio-bar" />
-          </div>
-        )}
+        {renderItem(top3[1], 'pr-podio-2', false)}
+        {renderItem(top3[0], 'pr-podio-1', true)}
+        {renderItem(top3[2], 'pr-podio-3', false)}
       </div>
     </div>
   )

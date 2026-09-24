@@ -11,8 +11,8 @@ export default function PersonaDetalleModal({ personaDetalle, onCerrar }) {
         <div className="modal-header">
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
             <span
-              className="badge"
-              style={{ background: personaDetalle.color + '20', color: personaDetalle.color, fontSize: 12, padding: '3px 10px' }}
+              className="badge tag-c"
+              style={{ '--tag': personaDetalle.color, fontSize: 12, padding: '3px 10px' }}
             >
               {personaDetalle.concepto}
             </span>

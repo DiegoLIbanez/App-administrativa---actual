@@ -5,6 +5,7 @@
 // Soporta filtrado y asignación por empresa ('ameriglobal' / 'global_link').
 // =============================================================
 import { supabase } from '../supabaseClient'
+import { resolverIdsRelacionales, resolverIdsEnLote } from './idResolvers'
 
 const TABLA = 'registros_parqueadero'
 
@@ -14,24 +15,48 @@ export function listarRegistrosParqueadero(empresa) {
   return query
 }
 
-export function crearRegistroParqueadero(payload, empresa = 'ameriglobal') {
+export async function crearRegistroParqueadero(payload, empresa = 'ameriglobal') {
+  const empresaFinal = payload.empresa || empresa
+  // registros_parqueadero no tiene columna de departamento, por eso solo
+  // se resuelven empleado_id y empresa_id.
+  const { empleado_id, empresa_id } = await resolverIdsRelacionales({
+    nombre_empleado: payload.nombre_empleado,
+    empresa: empresaFinal,
+  })
   return supabase.from(TABLA).insert([{
     ...payload,
-    empresa: payload.empresa || empresa,
+    empresa: empresaFinal,
+    empleado_id,
+    empresa_id,
   }])
 }
 
 /** Inserta varios registros a la vez (usado al duplicar/copiar registros). */
-export function crearRegistrosParqueadero(payloads, empresa = 'ameriglobal') {
-  const formateados = (payloads || []).map(p => ({
-    ...p,
-    empresa: p.empresa || empresa,
-  }))
+export async function crearRegistrosParqueadero(payloads, empresa = 'ameriglobal') {
+  const formateados = await resolverIdsEnLote(payloads, empresa)
   return supabase.from(TABLA).insert(formateados)
 }
 
-export function actualizarRegistroParqueadero(id, payload) {
-  return supabase.from(TABLA).update(payload).eq('id', id)
+export async function actualizarRegistroParqueadero(id, payload) {
+  const dataToUpdate = { ...payload }
+
+  if (payload.nombre_empleado || payload.empresa) {
+    let { nombre_empleado, empresa } = payload
+    if (!nombre_empleado || !empresa) {
+      const { data: actual } = await supabase
+        .from(TABLA)
+        .select('nombre_empleado, empresa')
+        .eq('id', id)
+        .maybeSingle()
+      nombre_empleado = nombre_empleado || actual?.nombre_empleado
+      empresa = empresa || actual?.empresa
+    }
+    const { empleado_id, empresa_id } = await resolverIdsRelacionales({ nombre_empleado, empresa })
+    dataToUpdate.empleado_id = empleado_id
+    dataToUpdate.empresa_id = empresa_id
+  }
+
+  return supabase.from(TABLA).update(dataToUpdate).eq('id', id)
 }
 
 export function eliminarRegistroParqueadero(id) {

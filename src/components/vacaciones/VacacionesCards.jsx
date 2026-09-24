@@ -72,7 +72,7 @@ export default function VacacionesCards({
                 {row.dias_en_dinero != null && row.dias_en_dinero !== '' && (
                   <div style={{
                     display: 'inline-flex', alignItems: 'center', gap: 5,
-                    background: '#FEF3C7', color: '#92400E', border: '1px solid #FCD34D',
+                    background: 'var(--warning-bg)', color: 'var(--warning-text)', border: '1px solid color-mix(in srgb, var(--warning) 40%, transparent)',
                     borderRadius: 8, padding: '4px 10px', fontSize: 12, fontWeight: 700, marginBottom: 8,
                   }}>
                     💰 {row.dias_en_dinero} días en dinero

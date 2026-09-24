@@ -1,7 +1,8 @@
-import { Eye, Edit2, Trash2 } from 'lucide-react'
+import { Eye, Edit2, Trash2, History } from 'lucide-react'
 import { PAGE_SIZE } from '../../utils/parqueaderoConstants'
 import { TipoBadge, ObsBadge } from './Badges'
 import Paginacion from '../ui/Paginacion'
+import PersonCell from '../ui/PersonCell'
 
 export default function ParqueaderoTabla({
   paged, filtered, page, totalPages, setPage,
@@ -28,11 +29,11 @@ export default function ParqueaderoTabla({
             {paged.map((row, idx) => (
               <tr key={row.id} className="park-row" style={{
                 animationDelay: `${Math.min(idx, 8) * 0.03}s`,
-                background: row.retirado ? '#FEE2E2' : undefined,
+                '--row-bg': row.retirado ? 'var(--danger-bg)' : undefined,
                 borderLeft: row.retirado ? '4px solid #DC2626' : '4px solid transparent',
               }}>
-                <td style={{ fontWeight: 700, maxWidth: 180, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', color: row.retirado ? '#991B1B' : undefined }}>
-                  {row.nombre_empleado}
+                <td style={{ maxWidth: 230 }}>
+                  <PersonCell nombre={row.nombre_empleado} color={row.retirado ? '#DC2626' : undefined} />
                 </td>
                 <td style={{ color: 'var(--text-muted)', whiteSpace: 'nowrap' }}>{[row.mes, row.anio].filter(Boolean).join(' ') || '—'}</td>
                 <td style={{ fontFamily: 'monospace', fontWeight: 700, letterSpacing: '0.05em' }}>{row.placa || '—'}</td>
@@ -45,20 +46,20 @@ export default function ParqueaderoTabla({
                 <td style={{ textAlign: 'center' }}>
                   {row.retirado
                     ? <span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 5, padding: '3px 10px', borderRadius: 999, fontSize: 11, fontWeight: 800, background: '#DC2626', color: '#fff', lineHeight: 1 }}><span style={{ fontSize: 8 }}>●</span>RETIRADO</span>
-                    : <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, padding: '3px 10px', borderRadius: 999, fontSize: 11, fontWeight: 700, background: '#DCFCE7', color: '#166534', border: '1px solid #86EFAC' }}>✓ Activo</span>}
+                    : <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, padding: '3px 10px', borderRadius: 999, fontSize: 11, fontWeight: 700, background: 'var(--success-bg)', color: 'var(--success-text)', border: '1px solid color-mix(in srgb, var(--success) 35%, transparent)' }}>✓ Activo</span>}
                 </td>
                 <td style={{ color: 'var(--text-muted)', fontSize: 12, maxWidth: 180, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={row.nota_vehiculo || ''}>{row.nota_vehiculo || '—'}</td>
                 <td style={{ textAlign: 'center' }}>
                   {row.fecha_envio_reporte ? (
-                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, padding: '2px 8px', borderRadius: 999, fontSize: 11, fontWeight: 700, background: '#EEF2FF', color: '#4338CA', border: '1px solid #C7D2FE' }}>
+                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, padding: '2px 8px', borderRadius: 999, fontSize: 11, fontWeight: 700, background: 'var(--info-bg)', color: 'var(--info-text)', border: '1px solid color-mix(in srgb, var(--info) 35%, transparent)' }}>
                       📤 {row.fecha_envio_reporte.split('T')[0]}
                     </span>
-                  ) : <span style={{ color: '#FCD34D', fontSize: 12, fontWeight: 600 }}>● Pendiente</span>}
+                  ) : <span style={{ color: 'color-mix(in srgb, var(--warning) 40%, transparent)', fontSize: 12, fontWeight: 600 }}>● Pendiente</span>}
                 </td>
                 <td>
                   <div style={{ display: 'flex', gap: 4 }}>
-                    <button className="btn btn-ghost btn-sm" title="Ver detalle" onClick={() => setViewRow(row)}><Eye size={13} /></button>
-                    <button className="btn btn-ghost btn-sm" title="Historial" onClick={() => setHistorial(row)} style={{ fontSize: 11, padding: '3px 7px' }}>📋</button>
+                    <button className="icon-btn" title="Ver detalle" onClick={() => setViewRow(row)}><Eye size={13} /></button>
+                    <button className="icon-btn" title="Historial" onClick={() => setHistorial(row)}><History size={13} /></button>
                     <button className="icon-btn" title="Editar" onClick={() => openEdit(row)}><Edit2 size={13} /></button>
                     <button className="icon-btn icon-btn--danger" title="Eliminar" onClick={() => setDeleteId(row.id)}><Trash2 size={13} /></button>
                   </div>

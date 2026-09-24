@@ -8,7 +8,7 @@ export default function ModalCopiar({ modalCopiar, copiando, onClose, onConfirm 
       <div className="modal" style={{ maxWidth: 480 }}>
         <div className="modal-header">
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            <div style={{ width: 38, height: 38, borderRadius: '50%', background: '#F0FDF4', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, fontSize: 18 }}>📋</div>
+            <div style={{ width: 38, height: 38, borderRadius: '50%', background: 'var(--success-bg)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, fontSize: 18 }}>📋</div>
             <div>
               <h2 style={{ margin: 0, fontSize: 16 }}>Copiar al siguiente mes</h2>
               <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{modalCopiar.mesOrigen} {modalCopiar.anioOrigen} → {modalCopiar.mesDestino} {modalCopiar.anioDestino}</div>
@@ -17,21 +17,21 @@ export default function ModalCopiar({ modalCopiar, copiando, onClose, onConfirm 
           <button className="modal-close" onClick={onClose} disabled={copiando}><X size={18} /></button>
         </div>
         <div className="modal-body">
-          <div style={{ background: '#F0FDF4', border: '1px solid #86EFAC', borderRadius: 8, padding: '12px 14px', marginBottom: 12 }}>
-            <div style={{ fontSize: 13, fontWeight: 600, color: '#166534', marginBottom: 6 }}>
+          <div style={{ background: 'var(--success-bg)', border: '1px solid color-mix(in srgb, var(--success) 35%, transparent)', borderRadius: 8, padding: '12px 14px', marginBottom: 12 }}>
+            <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--success-text)', marginBottom: 6 }}>
               📋 {modalCopiar.registros.length} registro(s) se copiarán a <strong>{modalCopiar.mesDestino} {modalCopiar.anioDestino}</strong>
             </div>
-            <div style={{ fontSize: 12, color: '#166534' }}>
+            <div style={{ fontSize: 12, color: 'var(--success-text)' }}>
               Se copian: nombre, placa, cédula, teléfono, tipo y observación.<br />
               Se limpian: fechas de ingreso/retiro y envío de reporte.
             </div>
           </div>
           {modalCopiar.yaExisten.length > 0 && (
-            <div style={{ background: '#FEF3C7', border: '1px solid #FCD34D', borderRadius: 8, padding: '12px 14px', marginBottom: 12 }}>
-              <div style={{ fontSize: 13, fontWeight: 600, color: '#92400E', marginBottom: 4 }}>
+            <div style={{ background: 'var(--warning-bg)', border: '1px solid color-mix(in srgb, var(--warning) 40%, transparent)', borderRadius: 8, padding: '12px 14px', marginBottom: 12 }}>
+              <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--warning-text)', marginBottom: 4 }}>
                 ⚠ Ya existen {modalCopiar.yaExisten.length} registro(s) en {modalCopiar.mesDestino} {modalCopiar.anioDestino}
               </div>
-              <div style={{ fontSize: 12, color: '#92400E' }}>Se agregarán los nuevos igualmente. Revisa después si hay duplicados.</div>
+              <div style={{ fontSize: 12, color: 'var(--warning-text)' }}>Se agregarán los nuevos igualmente. Revisa después si hay duplicados.</div>
             </div>
           )}
           <div style={{ maxHeight: 220, overflowY: 'auto', border: '1px solid var(--border)', borderRadius: 8 }}>
@@ -59,7 +59,7 @@ export default function ModalCopiar({ modalCopiar, copiando, onClose, onConfirm 
         </div>
         <div className="modal-footer">
           <button className="btn btn-ghost" onClick={onClose} disabled={copiando}>Cancelar</button>
-          <button className="btn" style={{ background: '#166534', color: '#fff' }} onClick={onConfirm} disabled={copiando}>
+          <button className="btn" style={{ background: 'var(--success-text)', color: '#fff' }} onClick={onConfirm} disabled={copiando}>
             {copiando ? '⏳ Copiando...' : `✅ Confirmar copia (${modalCopiar.registros.length})`}
           </button>
         </div>

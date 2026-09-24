@@ -1,3 +1,5 @@
+import PageTitle from '../components/ui/PageTitle'
+import { ClipboardList as TitleIcon } from 'lucide-react'
 import { useState, useEffect, useCallback, useMemo } from 'react'
 import { useCompany } from '../context/CompanyContext'
 import * as novedadesApi from '../api/novedades'
@@ -343,7 +345,7 @@ export default function Novedades() {
     <div>
       <div className="page-header" style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', flexWrap: 'wrap', gap: 10 }}>
         <div>
-          <h1>Novedades</h1>
+          <PageTitle icon={TitleIcon}>Novedades</PageTitle>
           <p>Consulta, agrega y edita los registros de novedades</p>
         </div>
         <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
@@ -414,7 +416,7 @@ export default function Novedades() {
               const v = (r.validacion_incapacidad || '').toLowerCase().trim()
               return !(r.radicacion_incapacidad || '').trim() || !(r.nomina_electronica || '').trim() || !(r.seguridad_social || '').trim() || v === '' || v === 'validar'
             }) && (
-                <span style={{ marginLeft: 8, display: 'inline-flex', alignItems: 'center', gap: 4, color: '#92400E', fontWeight: 600 }}>
+                <span style={{ marginLeft: 8, display: 'inline-flex', alignItems: 'center', gap: 4, color: 'var(--warning-text)', fontWeight: 600 }}>
                   <AlertCircle size={12} /> hay registros incompletos
                 </span>
               )}

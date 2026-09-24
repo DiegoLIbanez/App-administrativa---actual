@@ -3,6 +3,7 @@ import { useCompany } from '../../context/CompanyContext'
 import { diasHabilesEntre } from '../../utils/diasHabiles'
 import { calcAntiguedad } from '../../utils/vacacionesHelpers'
 import { ESTADOS, ESTADO_STYLES, DEPENDENCIAS } from '../../utils/vacacionesConstants'
+import SearchableSelect from '../ui/SearchableSelect'
 
 const GRAD = {
   'Vacaciones':             'linear-gradient(135deg,#0F6E56 0%,#10B981 100%)',
@@ -12,8 +13,8 @@ const GRAD = {
 const ICON = {
   'Vacaciones': '🌴', 'Vacaciones en dinero': '💰', 'Vacaciones compensadas': '📋',
 }
-const TIPO_COLS = { 'Vacaciones': '#0F6E56', 'Vacaciones en dinero': '#92400E', 'Vacaciones compensadas': '#1E40AF' }
-const TIPO_BGS = { 'Vacaciones': '#ECFDF5', 'Vacaciones en dinero': '#FEF3C7', 'Vacaciones compensadas': '#DBEAFE' }
+const TIPO_COLS = { 'Vacaciones': '#0F6E56', 'Vacaciones en dinero': 'var(--warning-text)', 'Vacaciones compensadas': 'var(--info-text)' }
+const TIPO_BGS = { 'Vacaciones': 'var(--success-bg)', 'Vacaciones en dinero': 'var(--warning-bg)', 'Vacaciones compensadas': 'var(--info-bg)' }
 
 export default function ModalForm({
   modal, form, setForm, f, save, saving,
@@ -94,27 +95,22 @@ export default function ModalForm({
           {/* S1: Empleado */}
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
-              <div style={{ width: 24, height: 24, borderRadius: 6, background: '#EFF6FF', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 13 }}>👤</div>
+              <div style={{ width: 24, height: 24, borderRadius: 6, background: 'var(--info-bg)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 13 }}>👤</div>
               <span style={{ fontSize: 11, fontWeight: 800, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#374151' }}>Empleado *</span>
             </div>
-            <div style={{ position: 'relative' }}>
-              <span style={{ position: 'absolute', left: 11, top: '50%', transform: 'translateY(-50%)', fontSize: 15, pointerEvents: 'none' }}>🔍</span>
-              <input className="form-control" list="vac-emp-list"
-                value={form.nombre_empleado} onChange={f('nombre_empleado')}
-                placeholder="Escribe para buscar empleado..." autoComplete="off"
-                style={{ paddingLeft: 34, fontSize: 14, fontWeight: 500 }} />
-            </div>
-            <datalist id="vac-emp-list">
-              {empActivos.map(e => <option key={e} value={e} />)}
-              {empInactivos.map(e => <option key={e} value={e} />)}
-            </datalist>
+            <SearchableSelect
+              value={form.nombre_empleado}
+              onChange={val => setForm(p => ({ ...p, nombre_empleado: val }))}
+              activos={empActivos} inactivos={empInactivos}
+              placeholder="— Seleccionar empleado —"
+            />
             {form.nombre_empleado?.trim() && (
               <div style={{ marginTop: 8, display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
                 <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, background: '#F5F3FF', color: '#7C3AED', border: '1px solid #DDD6FE', borderRadius: 999, padding: '3px 10px', fontSize: 12, fontWeight: 700 }}>
                   <Calendar size={11} /> Días hábiles {anioActual}: {diasAcumuladosForm}
                 </span>
                 {form.fecha_ingreso && calcAntiguedad(form.fecha_ingreso) && (
-                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, background: '#EFF6FF', color: '#1E40AF', border: '1px solid #BFDBFE', borderRadius: 999, padding: '3px 10px', fontSize: 12, fontWeight: 700 }}>
+                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, background: 'var(--info-bg)', color: 'var(--info-text)', border: '1px solid color-mix(in srgb, var(--info) 30%, transparent)', borderRadius: 999, padding: '3px 10px', fontSize: 12, fontWeight: 700 }}>
                     <Clock size={11} /> Antigüedad: {calcAntiguedad(form.fecha_ingreso)}
                   </span>
                 )}
@@ -150,7 +146,7 @@ export default function ModalForm({
                         border: sel ? `2px solid ${col}` : '2px solid var(--border)',
                         background: sel ? bg : 'var(--surface)',
                         transition: 'all .2s',
-                        boxShadow: sel ? `0 0 0 3px ${col}22,0 2px 8px ${col}18` : '0 1px 2px rgba(0,0,0,.05)',
+                        boxShadow: sel ? `0 0 0 3px color-mix(in srgb, ${col} 14%, transparent), 0 2px 8px color-mix(in srgb, ${col} 10%, transparent)` : '0 1px 2px rgba(0,0,0,.05)',
                         transform: sel ? 'translateY(-1px)' : 'none',
                       }}
                       onMouseEnter={e => { if (!sel) { e.currentTarget.style.borderColor = col; e.currentTarget.style.transform = 'translateY(-1px)' } }}
@@ -180,7 +176,7 @@ export default function ModalForm({
                         background: sel ? st.bg : 'var(--surface)',
                         color: sel ? st.color : 'var(--text-muted)',
                         transition: 'all .15s',
-                        boxShadow: sel ? `0 0 0 2px ${st.border}55` : 'none',
+                        boxShadow: sel ? `0 0 0 2px ${st.border}` : 'none',
                       }}>
                       {s}
                     </button>
@@ -216,7 +212,7 @@ export default function ModalForm({
             </div>
 
             {(form.tipo_vacacion || 'Vacaciones') === 'Vacaciones en dinero' ? (
-              <div style={{ background: '#FEF3C7', border: '1px solid #FCD34D', borderRadius: 8, padding: '10px 14px', fontSize: 13, color: '#92400E', display: 'flex', alignItems: 'center', gap: 8 }}>
+              <div style={{ background: 'var(--warning-bg)', border: '1px solid color-mix(in srgb, var(--warning) 40%, transparent)', borderRadius: 8, padding: '10px 14px', fontSize: 13, color: 'var(--warning-text)', display: 'flex', alignItems: 'center', gap: 8 }}>
                 <AlertCircle size={15} style={{ flexShrink: 0 }} />
                 No requiere fechas. Se asignan automáticamente <strong>15 días en dinero</strong>.
               </div>
@@ -249,7 +245,7 @@ export default function ModalForm({
                   {diasHabilesEntre(form.fecha_inicio, form.fecha_fin)} días hábiles
                 </span>
                 {form.dias_en_dinero && (
-                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, background: '#FEF3C7', color: '#92400E', border: '1px solid #FCD34D', borderRadius: 999, padding: '3px 11px', fontSize: 12, fontWeight: 700 }}>
+                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, background: 'var(--warning-bg)', color: 'var(--warning-text)', border: '1px solid color-mix(in srgb, var(--warning) 40%, transparent)', borderRadius: 999, padding: '3px 11px', fontSize: 12, fontWeight: 700 }}>
                     💰 {form.dias_en_dinero} en dinero
                   </span>
                 )}

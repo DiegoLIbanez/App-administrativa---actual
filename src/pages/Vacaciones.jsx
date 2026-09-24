@@ -1,3 +1,5 @@
+import PageTitle from '../components/ui/PageTitle'
+import { Sun as TitleIcon } from 'lucide-react'
 import { useState, useEffect, useCallback, useMemo } from 'react'
 import { useCompany } from '../context/CompanyContext'
 import * as vacacionesApi from '../api/vacaciones'
@@ -332,7 +334,7 @@ export default function Vacaciones() {
     <div>
       <div className="page-header" style={{display:'flex',alignItems:'flex-start',justifyContent:'space-between',flexWrap:'wrap',gap:10}}>
         <div>
-          <h1>Vacaciones</h1>
+          <PageTitle icon={TitleIcon}>Vacaciones</PageTitle>
           <p>Gestión y seguimiento de solicitudes de vacaciones</p>
         </div>
         <div style={{display:'flex',gap:8}}>
@@ -385,7 +387,7 @@ export default function Vacaciones() {
           </div>
         ) : filtered.length === 0 ? (
           <div className="empty-state" style={{animation:'fadeIn 0.3s ease'}}>
-            <Sun size={32} style={{color:'#FCD34D',marginBottom:8}}/>
+            <Sun size={32} style={{color:'color-mix(in srgb, var(--warning) 40%, transparent)',marginBottom:8}}/>
             <p>No hay registros que coincidan.</p>
             {hayFiltros && <button className="btn btn-ghost btn-sm" onClick={clearFilters} style={{marginTop:8}}><X size={13}/> Limpiar filtros</button>}
           </div>

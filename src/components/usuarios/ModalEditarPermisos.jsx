@@ -128,7 +128,7 @@ export default function ModalEditarPermisos({ user, onClose, onUpdated }) {
         <div className="modal-body" style={{ overflowY: 'auto', flex: 1, padding: '18px 24px' }}>
           {done ? (
             <div style={{ textAlign: 'center', padding: '24px 0' }}>
-              <div className="auth-pending-icon" style={{ background: '#DCFCE7', color: '#166534', margin: '0 auto 14px' }}>
+              <div className="auth-pending-icon" style={{ background: 'var(--success-bg)', color: 'var(--success-text)', margin: '0 auto 14px' }}>
                 <CheckCircle2 size={28} />
               </div>
               <p style={{ fontWeight: 700, fontSize: 15 }}>Permisos actualizados correctamente.</p>
@@ -188,7 +188,7 @@ export default function ModalEditarPermisos({ user, onClose, onUpdated }) {
                       padding: '12px 14px',
                       borderRadius: 12,
                       border: empresas.includes('ameriglobal') ? '2px solid #2563EB' : '1px solid var(--border)',
-                      background: empresas.includes('ameriglobal') ? '#EFF6FF' : 'var(--bg)',
+                      background: empresas.includes('ameriglobal') ? 'var(--info-bg)' : 'var(--bg)',
                       cursor: 'pointer',
                       transition: 'all 0.15s',
                     }}
@@ -200,7 +200,7 @@ export default function ModalEditarPermisos({ user, onClose, onUpdated }) {
                       style={{ accentColor: '#2563EB', width: 16, height: 16 }}
                     />
                     <div>
-                      <div style={{ fontWeight: 700, fontSize: 13, color: '#1E40AF' }}>🏢 AmeriGlobal</div>
+                      <div style={{ fontWeight: 700, fontSize: 13, color: 'var(--info-text)' }}>🏢 AmeriGlobal</div>
                       <div style={{ fontSize: 11, color: '#6B7280' }}>Gestión de novedades e incapacidades</div>
                     </div>
                   </label>
@@ -237,7 +237,7 @@ export default function ModalEditarPermisos({ user, onClose, onUpdated }) {
               {empresas.includes('ameriglobal') && (
                 <div style={{ marginBottom: 20, padding: 14, background: '#F8FAFC', borderRadius: 12, border: '1px solid #E2E8F0' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
-                    <span style={{ fontWeight: 700, fontSize: 13, color: '#1E40AF', display: 'flex', alignItems: 'center', gap: 6 }}>
+                    <span style={{ fontWeight: 700, fontSize: 13, color: 'var(--info-text)', display: 'flex', alignItems: 'center', gap: 6 }}>
                       🏢 Secciones permitidas en AmeriGlobal
                     </span>
                     <button
@@ -262,12 +262,12 @@ export default function ModalEditarPermisos({ user, onClose, onUpdated }) {
                             gap: 8,
                             padding: '6px 10px',
                             borderRadius: 8,
-                            background: isAllowed ? '#EFF6FF' : '#FFF',
-                            border: isAllowed ? '1px solid #BFDBFE' : '1px solid #E2E8F0',
+                            background: isAllowed ? 'var(--info-bg)' : '#FFF',
+                            border: isAllowed ? '1px solid color-mix(in srgb, var(--info) 30%, transparent)' : '1px solid #E2E8F0',
                             fontSize: 12,
                             fontWeight: isAllowed ? 600 : 400,
                             cursor: 'pointer',
-                            color: isAllowed ? '#1D4ED8' : 'var(--text)',
+                            color: isAllowed ? 'var(--info-text)' : 'var(--text)',
                           }}
                         >
                           <input

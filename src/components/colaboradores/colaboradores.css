@@ -32,15 +32,18 @@
 .col-chip    {
   display:inline-flex; align-items:center; gap:5px;
   padding:3px 10px; border-radius:999px; font-size:12px; font-weight:600;
-  background:#EFF6FF; color:#1D4ED8; border:1px solid #BFDBFE;
+  background:rgba(var(--secondary-rgb),.12); color:var(--secondary-dark); border:1px solid rgba(var(--secondary-rgb),.25);
   animation: fadeIn .2s ease both;
 }
-.col-chip button { background:none; border:none; cursor:pointer; color:#1D4ED8; display:flex; align-items:center; padding:0; opacity:.7; transition:opacity .15s; }
+.col-chip button { background:none; border:none; cursor:pointer; color:var(--secondary-dark); display:flex; align-items:center; padding:0; opacity:.7; transition:opacity .15s; }
 .col-chip button:hover { opacity:1; }
+:root[data-theme="dark"] .col-chip { background:rgba(var(--secondary-rgb),.18); color:var(--secondary); border-color:rgba(var(--secondary-rgb),.35); }
+:root[data-theme="dark"] .col-chip button { color:var(--secondary); }
+
 .col-skel {
   background: linear-gradient(90deg, var(--border) 25%, var(--bg) 50%, var(--border) 75%);
   background-size:200% 100%; animation:shimmer 1.4s infinite; border-radius:6px;
 }
 .col-tab { padding:6px 14px; border-radius:20px; font-size:12px; font-weight:700; cursor:pointer; border:1px solid var(--border); background:var(--surface); color:var(--text); transition:all .18s; white-space:nowrap; }
-.col-tab:hover { border-color:var(--secondary); color:var(--secondary-dark); }
+.col-tab:hover { border-color:var(--secondary); color:var(--secondary-dark); background:var(--bg); }
 .col-tab.active { background:var(--secondary); color:#fff; border-color:var(--secondary); box-shadow: 0 4px 12px rgba(var(--secondary-rgb),.3); }

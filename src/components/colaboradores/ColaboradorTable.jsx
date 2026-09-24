@@ -41,7 +41,7 @@ export default function ColaboradorTable({ paged, onSelect }) {
                 <td style={{ textAlign: 'center', fontWeight: 700, color: '#DC2626' }}>{col.episodiosInc}</td>
                 <td style={{ textAlign: 'center' }}>
                   {col.diasInc > 0 && (
-                    <span style={{ background: '#FEF2F2', color: '#991B1B', borderRadius: 999, padding: '2px 10px', fontWeight: 700, fontSize: 12 }}>
+                    <span style={{ background: 'var(--danger-bg)', color: 'var(--danger-text)', borderRadius: 999, padding: '2px 10px', fontWeight: 700, fontSize: 12 }}>
                       {col.diasInc.toFixed(0)}d
                     </span>
                   )}
@@ -62,13 +62,13 @@ export default function ColaboradorTable({ paged, onSelect }) {
                   <div style={{ display: 'flex', gap: 4, justifyContent: 'center', flexWrap: 'wrap' }}>
                     {Object.keys(col.porConcepto).slice(0, 3).map(c => {
                       const color = CONCEPTO_COLORS[c] || '#374151'
-                      return <span key={c} style={{ fontSize: 10, fontWeight: 600, padding: '1px 6px', borderRadius: 999, background: color + '18', color }}>{c}</span>
+                      return <span key={c} className="tag-c" style={{ '--tag': color, fontSize: 10, fontWeight: 600, padding: '1px 6px', borderRadius: 999 }}>{c}</span>
                     })}
                   </div>
                 </td>
                 <td style={{ textAlign: 'center' }}>
                   {col.episodiosInc >= 2
-                    ? <span style={{ background: '#FEE2E2', color: '#991B1B', borderRadius: 20, padding: '2px 8px', fontSize: 11, fontWeight: 700 }}>Sí</span>
+                    ? <span style={{ background: 'var(--danger-bg)', color: 'var(--danger-text)', borderRadius: 20, padding: '2px 8px', fontSize: 11, fontWeight: 700 }}>Sí</span>
                     : <span style={{ color: 'var(--text-muted)' }}>—</span>}
                 </td>
               </tr>

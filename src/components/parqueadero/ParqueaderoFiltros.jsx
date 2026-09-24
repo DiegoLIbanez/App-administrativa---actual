@@ -29,9 +29,9 @@ export default function ParqueaderoFiltros({
         {tabs.map(t => (
           <button key={t.val} onClick={() => { setFilterTab(t.val); setFilterTipo(''); setPage(1) }} style={{
             padding: '5px 13px', borderRadius: 999, fontSize: 11, cursor: 'pointer', fontWeight: filterTab === t.val ? 700 : 400,
-            border: filterTab === t.val ? (t.warn ? '1.5px solid #C7D2FE' : '1.5px solid var(--primary)') : (t.warn ? '1px solid #C7D2FE' : '1px solid var(--border)'),
-            color: filterTab === t.val ? '#fff' : (t.warn ? '#4338CA' : 'var(--text-muted)'),
-            background: filterTab === t.val ? (t.warn ? '#4338CA' : 'var(--primary)') : (t.warn ? '#EEF2FF' : 'var(--surface,var(--bg))'),
+            border: filterTab === t.val ? (t.warn ? '1.5px solid color-mix(in srgb, var(--info) 35%, transparent)' : '1.5px solid var(--primary)') : (t.warn ? '1px solid color-mix(in srgb, var(--info) 35%, transparent)' : '1px solid var(--border)'),
+            color: filterTab === t.val ? '#fff' : (t.warn ? 'var(--info-text)' : 'var(--text-muted)'),
+            background: filterTab === t.val ? (t.warn ? '#4338CA' : 'var(--primary)') : (t.warn ? 'var(--info-bg)' : 'var(--surface,var(--bg))'),
             transition: 'all .15s',
           }}>{t.label}</button>
         ))}

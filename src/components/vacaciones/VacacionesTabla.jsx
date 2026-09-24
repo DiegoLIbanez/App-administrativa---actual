@@ -4,6 +4,7 @@ import { PAGE_SIZE } from '../../utils/vacacionesConstants'
 import { formatFecha } from '../../utils/vacacionesHelpers'
 import { EditableEstadoBadge, TipoBadge } from './Badges'
 import Paginacion from '../ui/Paginacion'
+import PersonCell from '../ui/PersonCell'
 
 function SortIcon({ field, sortField, sortAsc }) {
   return (
@@ -41,7 +42,7 @@ export default function VacacionesTabla({
           <tbody>
             {paged.map((row, idx) => (
               <tr key={row.id} className="vac-row" style={{ animationDelay: `${Math.min(idx, 8) * 0.03}s` }}>
-                <td style={{ fontWeight: 600, maxWidth: 180, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{row.nombre_empleado}</td>
+                <td style={{ maxWidth: 230 }}><PersonCell nombre={row.nombre_empleado} /></td>
                 <td style={{ color: 'var(--text-muted)', fontSize: 12, whiteSpace: 'nowrap' }}>{row.fecha_ingreso ? formatFecha(row.fecha_ingreso) : '—'}</td>
                 <td style={{ color: 'var(--text-muted)', fontSize: 12 }}>{row.dependencia || '—'}</td>
                 <td style={{ fontSize: 12, whiteSpace: 'nowrap', color: 'var(--text-muted)' }}>{row.periodo_vacaciones || '—'}</td>
@@ -57,7 +58,7 @@ export default function VacacionesTabla({
                 </td>
                 <td style={{ textAlign: 'center' }}>
                   {row.dias_en_dinero != null && row.dias_en_dinero !== '' ? (
-                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, padding: '2px 8px', borderRadius: 999, fontSize: 11, fontWeight: 700, background: '#FEF3C7', color: '#92400E', border: '1px solid #FCD34D' }}>
+                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, padding: '2px 8px', borderRadius: 999, fontSize: 11, fontWeight: 700, background: 'var(--warning-bg)', color: 'var(--warning-text)', border: '1px solid color-mix(in srgb, var(--warning) 40%, transparent)' }}>
                       💰 {row.dias_en_dinero}d
                     </span>
                   ) : '—'}
@@ -66,7 +67,7 @@ export default function VacacionesTabla({
                 <td style={{ color: 'var(--text-muted)', fontSize: 12, maxWidth: 160, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{row.observacion_contable || '—'}</td>
                 <td>
                   <div style={{ display: 'flex', gap: 4 }}>
-                    <button className="btn btn-ghost btn-sm" title="Ver detalle" onClick={() => setViewRow(row)}><Eye size={13} /></button>
+                    <button className="icon-btn" title="Ver detalle" onClick={() => setViewRow(row)}><Eye size={13} /></button>
                     <button className="icon-btn" title="Editar" onClick={() => openEdit(row)}><Edit2 size={13} /></button>
                     <button className="icon-btn icon-btn--danger" title="Eliminar" onClick={() => setDeleteId(row.id)}><Trash2 size={13} /></button>
                   </div>

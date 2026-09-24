@@ -1,3 +1,5 @@
+import PageTitle from '../components/ui/PageTitle'
+import { ShieldCheck as TitleIcon } from 'lucide-react'
 import { useState, useEffect, useCallback, useMemo } from 'react'
 import * as authApi from '../api/auth'
 import * as perfilesApi from '../api/perfiles'
@@ -10,6 +12,7 @@ import {
 import ModalEditarPermisos from '../components/usuarios/ModalEditarPermisos'
 import ModalGestionDepartamentos from '../components/usuarios/ModalGestionDepartamentos'
 import ModalAuditLogs from '../components/usuarios/ModalAuditLogs'
+import PersonCell from '../components/ui/PersonCell'
 
 const FILTROS = [
   { id: '',           label: 'Todos' },
@@ -136,7 +139,7 @@ function ModalCrearUsuario({ onClose, onCreated }) {
         <div className="modal-body">
           {done ? (
             <div style={{ textAlign: 'center', padding: '12px 0' }}>
-              <div className="auth-pending-icon" style={{ background: '#DCFCE7', color: '#166534', margin: '0 auto 14px' }}>
+              <div className="auth-pending-icon" style={{ background: 'var(--success-bg)', color: 'var(--success-text)', margin: '0 auto 14px' }}>
                 <CheckCircle2 size={26} />
               </div>
               <p style={{ fontWeight: 600 }}>Usuario creado y activado correctamente.</p>
@@ -281,7 +284,7 @@ export default function Usuarios() {
     <div>
       <div className="page-header" style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 16, flexWrap: 'wrap' }}>
         <div>
-          <h1>Gestión de Usuarios y Roles</h1>
+          <PageTitle icon={TitleIcon}>Gestión de Usuarios y Roles</PageTitle>
           <p>Administra accesos, asigna permisos por empresa (AmeriGlobal / Global Link) y crea departamentos.</p>
         </div>
         <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
@@ -342,7 +345,7 @@ export default function Usuarios() {
         </div>
         <div className="stat-card">
           <div className="stat-label">Activos</div>
-          <div className="stat-value" style={{ color: '#166534' }}>{stats.activos}</div>
+          <div className="stat-value" style={{ color: 'var(--success-text)' }}>{stats.activos}</div>
         </div>
         <div className="stat-card">
           <div className="stat-label">Administradores</div>
@@ -406,9 +409,10 @@ export default function Usuarios() {
 
                   return (
                     <tr key={row.id}>
-                      <td style={{ fontWeight: 600 }}>
-                        {row.nombre_completo || '—'}
-                        {esYo && <span style={{ fontSize: 11, color: 'var(--text-muted)', fontWeight: 400 }}> (tú)</span>}
+                      <td style={{ maxWidth: 240 }}>
+                        <PersonCell nombre={row.nombre_completo || '—'}>
+                          {esYo && <span style={{ fontSize: 11, color: 'var(--text-muted)', fontWeight: 400 }}>(tú)</span>}
+                        </PersonCell>
                       </td>
                       <td style={{ color: 'var(--text-muted)', fontSize: 12.5 }}>
                         <span style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
@@ -418,7 +422,7 @@ export default function Usuarios() {
                       <td>
                         <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
                           {userEmpresas.includes('ameriglobal') && (
-                            <span className="badge" style={{ background: '#EFF6FF', color: '#1D4ED8', border: '1px solid #BFDBFE', fontSize: 11 }}>
+                            <span className="badge" style={{ background: 'var(--info-bg)', color: 'var(--info-text)', border: '1px solid color-mix(in srgb, var(--info) 30%, transparent)', fontSize: 11 }}>
                               🏢 AmeriGlobal
                             </span>
                           )}
@@ -436,7 +440,7 @@ export default function Usuarios() {
                       </td>
                       <td style={{ textAlign: 'center' }}>
                         {row.es_admin ? (
-                          <span className="badge" style={{ background: '#F3E8FF', color: '#6B21A8' }}>
+                          <span className="badge" style={{ background: 'var(--purple-bg)', color: 'var(--purple-text)' }}>
                             <ShieldCheck size={11} style={{ marginRight: 3 }} /> Admin
                           </span>
                         ) : (
@@ -460,8 +464,8 @@ export default function Usuarios() {
                           <button
                             className="btn btn-sm"
                             style={row.activo
-                              ? { background: '#FEE2E2', color: '#991B1B', border: 'none' }
-                              : { background: '#DCFCE7', color: '#166534', border: 'none' }}
+                              ? { background: 'var(--danger-bg)', color: 'var(--danger-text)', border: 'none' }
+                              : { background: 'var(--success-bg)', color: 'var(--success-text)', border: 'none' }}
                             disabled={ocupado || (esYo && row.activo)}
                             onClick={() => toggleActivo(row)}
                             title={esYo && row.activo ? 'No puedes desactivar tu propia cuenta' : (row.activo ? 'Desactivar acceso' : 'Aprobar acceso')}

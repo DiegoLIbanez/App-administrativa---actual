@@ -38,9 +38,8 @@ export default function ConceptoSeccion({
       {/* Encabezado de sección */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 10, margin: '20px 0 10px' }}>
         <div style={{ flex: 1, height: 1, background: 'var(--border)' }} />
-        <span style={{
-          padding: '3px 14px', borderRadius: 20, fontSize: 12, fontWeight: 700,
-          background: color + '18', color, border: `1px solid ${color}40`,
+        <span className="tag-c tag-c--line" style={{
+          '--tag': color, padding: '3px 14px', borderRadius: 20, fontSize: 12, fontWeight: 700,
           whiteSpace: 'nowrap'
         }}>{concepto}</span>
         <div style={{ flex: 1, height: 1, background: 'var(--border)' }} />
@@ -51,13 +50,13 @@ export default function ConceptoSeccion({
         <StatCard label="Registros" value={d.count} sub={`${d.empUnicos} colaboradores`} color={color} delay={0} />
         {tieneDias && <StatCard label="Total días" value={Math.round(d.totalDias)} sub={`Prom. ${d.promDias.toFixed(1)} días/registro`} color={color} delay={60} />}
         {tieneDias && <StatCard label="Tasa ausentismo" value={d.tasaAusentismo} decimals={1} suffix="%" sub={`días / (${empleadosUnicosBase} colaboradores activos × ${diasPeriodoBase})`} title={`Tasa de ${concepto} sobre el total de colaboradores activos en el período (no solo los que tuvieron ${concepto}, y sin contar a quien ya se había retirado). Período usado: ${diasPeriodoLabel}.`} color="#0369A1" delay={120} />}
-        {d.reincidentes.length > 0 && <StatCard label="Reincidentes" value={d.reincidentes.length} sub="con 2+ episodios" color="#B91C1C" delay={180} />}
+        {d.reincidentes.length > 0 && <StatCard label="Reincidentes" value={d.reincidentes.length} sub="con 2+ episodios" color="var(--danger-text)" delay={180} />}
       </div>
 
       {/* Alertas de gestión */}
       {(d.sinRadicacion > 0 || d.sinNomina > 0 || d.sinSegSocial > 0 || d.pendientesValidar > 0) && (
         <div className="card" style={{ marginBottom: 12, borderLeft: `3px solid ${color}`, borderRadius: '0 8px 8px 0' }}>
-          <div style={{ fontSize: 12, fontWeight: 700, color: '#92400E', marginBottom: 8 }}>⚠ Pendientes de gestión ({concepto})</div>
+          <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--warning-text)', marginBottom: 8 }}>⚠ Pendientes de gestión ({concepto})</div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(190px, 1fr))', gap: 8 }}>
             {[
               { label: 'Sin radicación', val: d.sinRadicacion, c: '#DC2626', bg: 'rgba(220,38,38,.08)' },
@@ -112,7 +111,7 @@ export default function ConceptoSeccion({
                         <td style={{ fontWeight: 600, fontSize: 12 }}>{r.nombre_empleado}</td>
                         <td style={{ textAlign: 'center', fontSize: 12 }}>{r.fecha_fin}</td>
                         <td style={{ textAlign: 'center' }}>
-                          <span style={{ background: diasRest <= 2 ? 'rgba(220,38,38,.14)' : 'rgba(217,119,6,.14)', color: diasRest <= 2 ? '#991B1B' : '#92400E', borderRadius: 20, padding: '2px 8px', fontSize: 11, fontWeight: 700 }}>
+                          <span style={{ background: diasRest <= 2 ? 'rgba(220,38,38,.14)' : 'rgba(217,119,6,.14)', color: diasRest <= 2 ? 'var(--danger-text)' : 'var(--warning-text)', borderRadius: 20, padding: '2px 8px', fontSize: 11, fontWeight: 700 }}>
                             {diasRest === 0 ? 'Hoy' : `${diasRest}d`}
                           </span>
                         </td>
@@ -133,7 +132,7 @@ export default function ConceptoSeccion({
             <h3 style={{ fontSize: 13, fontWeight: 700 }}>Top colaboradores{tieneDias ? ' — clic en encabezado para ordenar' : ''}</h3>
             <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
               {d.reincidentes.length > 0 && (
-                <span style={{ fontSize: 11, color: '#B91C1C', background: '#FEE2E2', borderRadius: 20, padding: '2px 8px', fontWeight: 700 }}>
+                <span style={{ fontSize: 11, color: 'var(--danger-text)', background: 'var(--danger-bg)', borderRadius: 20, padding: '2px 8px', fontWeight: 700 }}>
                   {d.reincidentes.length} reincidentes
                 </span>
               )}
@@ -163,7 +162,7 @@ export default function ConceptoSeccion({
                       <td style={{ color: 'var(--text-muted)', fontWeight: 600 }}>{i + 1}</td>
                       <td style={{ fontWeight: 600, fontSize: 12, color: 'var(--primary)' }}>
                         {emp.nombre}
-                        {esReincidente && <span style={{ marginLeft: 6, fontSize: 10, color: '#B91C1C', fontWeight: 700 }}>●</span>}
+                        {esReincidente && <span style={{ marginLeft: 6, fontSize: 10, color: 'var(--danger-text)', fontWeight: 700 }}>●</span>}
                       </td>
                       <td style={{ color: 'var(--text-muted)', fontSize: 11 }}>{emp.area}</td>
                       <td style={{ textAlign: 'center' }}>{emp.episodios}</td>
@@ -176,7 +175,7 @@ export default function ConceptoSeccion({
             </table>
           </div>
           {d.reincidentes.length > 0 && (
-            <div style={{ fontSize: 11, color: '#B91C1C', marginTop: 8 }}>● reincidente (2+ episodios)</div>
+            <div style={{ fontSize: 11, color: 'var(--danger-text)', marginTop: 8 }}>● reincidente (2+ episodios)</div>
           )}
         </div>
       )}
