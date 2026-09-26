@@ -111,13 +111,15 @@ export default function Parqueadero() {
   const exentos = rowsBase.filter(r => r.observacion==='EXENTOS DE PAGO').length
   const total   = rowsBase.length || 1
 
-  const openAdd  = () => { setForm(EMPTY); setDupWarn(false); setModal('add') }
+  const openAdd  = () => { setForm({ ...EMPTY, mes: mesActual, anio: anioActual }); setDupWarn(false); setModal('add') }
   const openEdit = (row) => { setForm({...row}); setDupWarn(false); setModal('edit') }
   const f = k => e => { let v = e.target.value; if (k==='placa') v=v.toUpperCase(); setForm(p=>({...p,[k]:v})) }
 
   const save = async () => {
     if (!form.nombre_empleado || !form.placa || !form.tipo)
       return setMsg({type:'error',text:'Nombre, placa y tipo de vehículo son obligatorios.'})
+    if (!form.mes || !form.anio)
+      return setMsg({type:'error',text:'Selecciona el mes y el año del registro.'})
     setSaving(true)
     const cleanForm = { ...form, placa: form.placa.toUpperCase(), fecha_ingreso: form.fecha_ingreso||null, fecha_retiro: form.fecha_retiro||null, fecha_envio_reporte: form.fecha_envio_reporte||null }
     try {

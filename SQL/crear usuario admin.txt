@@ -1,0 +1,38 @@
+-- Cambia el correo y la contraseña antes de correrlo
+do $$
+declare
+  nuevo_id uuid := gen_random_uuid();
+  correo_admin text := 'admin@tudominio.com';
+  clave_admin text := 'CambiaEstaClave123!';
+begin
+  -- 1) Crea el usuario en auth.users
+  insert into auth.users (
+    instance_id, id, aud, role, email, encrypted_password,
+    email_confirmed_at, raw_app_meta_data, raw_user_meta_data,
+    created_at, updated_at,
+    confirmation_token, recovery_token, email_change_token_new, email_change
+  ) values (
+    '00000000-0000-0000-0000-000000000000',
+    nuevo_id, 'authenticated', 'authenticated', correo_admin,
+    crypt(clave_admin, gen_salt('bf')),
+    now(), '{"provider":"email","providers":["email"]}'::jsonb,
+    jsonb_build_object('nombre_completo', 'Administrador'),
+    now(), now(), '', '', '', ''
+  );
+
+  -- 2) Crea su identidad (requerido para poder loguearse con email/clave)
+  insert into auth.identities (
+    id, user_id, provider_id, identity_data, provider,
+    last_sign_in_at, created_at, updated_at
+  ) values (
+    gen_random_uuid(), nuevo_id, nuevo_id::text,
+    jsonb_build_object('sub', nuevo_id::text, 'email', correo_admin),
+    'email', now(), now(), now()
+  );
+end $$;
+
+-- 3) El trigger on_auth_user_created ya le creó su fila en perfiles
+--    (inactivo, no-admin) — la activamos y la hacemos admin:
+update public.perfiles
+set activo = true, es_admin = true, rol = 'admin'
+where correo = 'admin@tudominio.com';
